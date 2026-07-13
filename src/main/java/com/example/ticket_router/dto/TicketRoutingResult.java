@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 public record TicketRoutingResult(
     @NotBlank
     String category,
-    //notnull is uthe notblank equvalent for enums, it ensures that the priority field is not null
+    //@NotNull is the NotBlank equivalent for enums, it ensures that the priority field is not null
     @NotNull
     Priority priority,
     @NotBlank
