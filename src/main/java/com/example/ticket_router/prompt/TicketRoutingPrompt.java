@@ -81,14 +81,15 @@ public final class TicketRoutingPrompt {
             Respond ONLY with valid JSON.
             Do not include markdown.
             Do not include explanations outside the JSON.
+            The JSON field names are fixed. Do not rename, add, or remove fields.
 
             Return JSON matching this structure:
 
             {
-              "category": "string",
-              "team": "string",
-              "priority": "HIGH | MEDIUM | LOW",
-              "reason": "string"
+                "category": "Billing | Technical Issue | Account Access | Feature Request | General Inquiry",
+                "assignedTeam": "Accounts Department | Engineering Department | IAM Team | Product Development Team | Customer Service Team",
+                "priority": "HIGH, MEDIUM, or LOW",
+                "reasoning": "string"
             }
 
 
@@ -102,9 +103,9 @@ public final class TicketRoutingPrompt {
             Response:
             {
               "category": "Billing",
-              "team": "Accounts Department",
+              "assignedTeam": "Accounts Department",
               "priority": "MEDIUM",
-              "reason": "The customer reports a duplicate subscription charge."
+              "reasoning": "The customer reports a duplicate subscription charge."
             }
 
 
@@ -116,9 +117,9 @@ public final class TicketRoutingPrompt {
             Response:
             {
               "category": "Account Access",
-              "team": "IAM Team",
+              "assignedTeam": "IAM Team",
               "priority": "HIGH",
-              "reason": "The customer may have an account security compromise."
+              "reasoning": "The customer may have an account security compromise."
             }
 
 
@@ -130,9 +131,9 @@ public final class TicketRoutingPrompt {
             Response:
             {
               "category": "Feature Request",
-              "team": "Product Development Team",
+              "assignedTeam": "Product Development Team",
               "priority": "LOW",
-              "reason": "The customer is requesting a new product feature."
+              "reasoning": "The customer is requesting a new product feature."
             }
             """;
 
