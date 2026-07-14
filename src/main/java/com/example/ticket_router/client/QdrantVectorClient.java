@@ -24,10 +24,10 @@ public class QdrantVectorClient implements QdrantClient {
 
     }
 
-
     @Override
-    public void createCollection() {
+public void createCollection() {
 
+    try {
 
         String body = """
                 {
@@ -47,6 +47,18 @@ public class QdrantVectorClient implements QdrantClient {
                 .block();
 
 
+        System.out.println("Qdrant collection created");
+
+    } catch (Exception e) {
+
+        if (e.getMessage().contains("409")) {
+            System.out.println("Qdrant collection already exists");
+        } else {
+            throw e;
+        }
+
     }
+
+}
 
 }
