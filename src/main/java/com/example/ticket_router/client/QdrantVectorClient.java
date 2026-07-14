@@ -5,6 +5,7 @@ import com.example.ticket_router.config.QdrantProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
 
 @Component
 public class QdrantVectorClient implements QdrantClient {
@@ -49,16 +50,49 @@ public void createCollection() {
 
         System.out.println("Qdrant collection created");
 
-    } catch (Exception e) {
-
-        if (e.getMessage().contains("409")) {
-            System.out.println("Qdrant collection already exists");
-        } else {
-            throw e;
+        } catch (Exception e) {
+            if (e.getMessage().contains("409")) {
+                System.out.println("Qdrant collection already exists");
+            } else {
+                throw e;
+            }
         }
 
     }
+    public void saveTicket(
+            String ticketId,
+            String ticketText,
+            List<Float> vector
+    ) {
 
-}
+        String body = """
+                {
+                "points": [
+                    {
+                    "id": "%s",
+                    "vector": %s,
+                    "payload": {
+                        "ticket": "%s"
+                    }
+                    }
+                ]
+                }
+                """.formatted(
+                    ticketId,
+                    vector.toString(),
+                    ticketText.replace("\"", "\\\"")
+                );
 
+
+        webClient.put()
+                .uri("/collections/" + properties.getCollection() + "/points")
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+
+        System.out.println("Ticket stored in Qdrant");
+
+    }
 }
