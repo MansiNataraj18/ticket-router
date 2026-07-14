@@ -47,6 +47,14 @@
 <body>
 
 <h2>Smart Ticket Router</h2>
+<h3>
+    Welcome, <span th:text="${userName}"></span>
+</h3>
+
+<input 
+    type="hidden"
+    id="userName"
+    th:value="${userName}">
 
 <textarea id="message"
           placeholder="Paste a support ticket message..."></textarea>
