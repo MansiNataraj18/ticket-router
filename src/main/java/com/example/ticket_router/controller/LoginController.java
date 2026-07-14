@@ -1,38 +1,96 @@
 package com.example.ticket_router.controller;
 
 import jakarta.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.ticket_router.entity.UserProfile;
 import com.example.ticket_router.repository.UserProfileRepository;
 
+
 @Controller
 public class LoginController {
 
+
+    private static final Logger log =
+            LoggerFactory.getLogger(LoginController.class);
+
+
     private final UserProfileRepository userProfileRepository;
 
-public LoginController(
-        UserProfileRepository userProfileRepository
-) {
-    this.userProfileRepository = userProfileRepository;
-}
+
+
+    public LoginController(
+            UserProfileRepository userProfileRepository
+    ) {
+
+        this.userProfileRepository = userProfileRepository;
+
+    }
+
+
+
     @GetMapping("/login")
-    public String loginPage(HttpSession session) {
+    public String loginPage(
+            HttpSession session
+    ) {
 
-        if (session.getAttribute("username") != null) {
 
-            String role = (String) session.getAttribute("role");
+        String username =
+                (String) session.getAttribute("username");
+
+
+        if (username != null) {
+
+
+            String role =
+                    (String) session.getAttribute("role");
+
+
+            log.info(
+                    "Existing session found for user={}, role={}",
+                    username,
+                    role
+            );
+
 
             if ("ADMIN".equals(role)) {
+
+                log.info(
+                        "Redirecting admin user to dashboard"
+                );
+
                 return "redirect:/admin";
+
             }
 
+
+            log.info(
+                    "Redirecting user {} to dashboard",
+                    username
+            );
+
+
             return "redirect:/";
+
         }
 
+
+        log.info(
+                "No active session. Showing login page"
+        );
+
+
         return "login";
+
     }
+
+
+
 
     @PostMapping("/login")
     public String login(
@@ -40,40 +98,114 @@ public LoginController(
             HttpSession session
     ) {
 
+
+        log.info(
+                "Login attempt for username={}",
+                username
+        );
+
+
+
         UserProfile userProfile =
-        userProfileRepository
-                .findByName(username)
-                .orElseGet(() ->
-                        userProfileRepository.save(
-                                new UserProfile(username)
-                        )
-                );
+                userProfileRepository
+                        .findByName(username)
+                        .orElseGet(() -> {
 
 
-session.setAttribute(
-        "userProfile",
-        userProfile
-);
+                            log.info(
+                                    "Creating new user profile for username={}",
+                                    username
+                            );
 
-session.setAttribute(
-        "username",
-        username
-);
+
+                            return userProfileRepository.save(
+                                    new UserProfile(username)
+                            );
+
+                        });
+
+
+
+        session.setAttribute(
+                "userProfile",
+                userProfile
+        );
+
+
+        session.setAttribute(
+                "username",
+                username
+        );
+
+
 
         if ("admin".equalsIgnoreCase(username)) {
-            session.setAttribute("role", "ADMIN");
+
+
+            session.setAttribute(
+                    "role",
+                    "ADMIN"
+            );
+
+
+            log.info(
+                    "Admin login successful for username={}",
+                    username
+            );
+
+
             return "redirect:/admin";
+
         }
 
-        session.setAttribute("role", "USER");
+
+
+        session.setAttribute(
+                "role",
+                "USER"
+        );
+
+
+        log.info(
+                "User login successful for username={}",
+                username
+        );
+
+
         return "redirect:/";
+
     }
 
+
+
+
+
     @GetMapping("/logout")
-    public String logout(HttpSession session) {
+    public String logout(
+            HttpSession session
+    ) {
+
+
+        String username =
+                (String) session.getAttribute("username");
+
+
+        log.info(
+                "Logout request for username={}",
+                username
+        );
+
 
         session.invalidate();
 
+
+        log.info(
+                "Session invalidated successfully"
+        );
+
+
         return "redirect:/login";
+
     }
+
 }
