@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <title>Admin Dashboard</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<header class="top-bar">
+
+
+    <div>
+
+        <h1>🛠 Admin Dashboard</h1>
+
+        <p>
+            View all support tickets
+        </p>
+
+    </div>
+
+
+    <div>
+
+        <a href="/logout">
+            Logout
+        </a>
+
+    </div>
+
+
+</header>
+
+
+
+
+
+<section class="card">
+
+
+<h2>
+    All Tickets
+</h2>
+
+
+
+
+<div th:if="${#lists.isEmpty(tickets)}">
+
+    <p>
+        No tickets available.
+    </p>
+
+</div>
+
+
+
+
+
+<div th:each="ticket : ${tickets}"
+     class="ticket-card">
+
+
+    <h3>
+
+        User:
+
+        <span th:text="${ticket.userProfile.name}">
+            username
+        </span>
+
+    </h3>
+
+
+
+
+    <p>
+
+        <strong>
+            Message:
+        </strong>
+
+        <span th:text="${ticket.message}">
+            message
+        </span>
+
+    </p>
+
+
+
+
+    <p>
+
+        <strong>
+            Category:
+        </strong>
+
+        <span th:text="${ticket.category}">
+            category
+        </span>
+
+    </p>
+
+
+
+
+    <p>
+
+        <strong>
+            Priority:
+        </strong>
+
+        <span th:text="${ticket.priority}">
+            priority
+        </span>
+
+    </p>
+
+
+
+
+    <p>
+
+        <strong>
+            Assigned Team:
+        </strong>
+
+        <span th:text="${ticket.assignedTeam}">
+            team
+        </span>
+
+    </p>
+
+
+
+
+    <div class="reasoning">
+
+        <h4>
+            AI Reasoning
+        </h4>
+
+        <p th:text="${ticket.reasoning}">
+            reasoning
+        </p>
+
+    </div>
+
+
+
+
+    <small>
+
+        Created:
+
+        <span th:text="${ticket.createdAt}">
+            date
+        </span>
+
+    </small>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+</div>
+
+
+</body>
+
+</html>

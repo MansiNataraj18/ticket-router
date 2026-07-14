@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <title>My Tickets</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <header class="top-bar">
+
+        <div>
+
+            <h1>🎫 My Tickets</h1>
+
+            <p>
+                View your previous support requests
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <a href="/">
+                Submit Ticket
+            </a>
+
+            <br>
+
+            <a href="/logout">
+                Logout
+            </a>
+
+        </div>
+
+
+    </header>
+
+
+
+
+    <section class="card">
+
+
+        <div th:if="${#lists.isEmpty(tickets)}">
+
+            <h3>
+                No tickets found
+            </h3>
+
+            <p>
+                Your submitted tickets will appear here.
+            </p>
+
+        </div>
+
+
+
+
+        <div th:each="ticket : ${tickets}"
+             class="ticket-card">
+
+
+            <h2 th:text="${ticket.category}">
+                Category
+            </h2>
+
+
+
+            <p>
+
+                <strong>
+                    Issue:
+                </strong>
+
+                <span th:text="${ticket.message}">
+                    Message
+                </span>
+
+            </p>
+
+
+
+
+            <p>
+
+                <strong>
+                    Priority:
+                </strong>
+
+                <span th:text="${ticket.priority}">
+                    HIGH
+                </span>
+
+            </p>
+
+
+
+
+            <p>
+
+                <strong>
+                    Assigned Team:
+                </strong>
+
+                <span th:text="${ticket.assignedTeam}">
+                    Team
+                </span>
+
+            </p>
+
+
+
+
+
+            <div class="reasoning">
+
+
+                <h3>
+                    AI Reasoning
+                </h3>
+
+
+                <p th:text="${ticket.reasoning}">
+                    Reasoning
+                </p>
+
+
+            </div>
+
+
+
+
+            <small>
+
+                Created:
+
+                <span th:text="${ticket.createdAt}">
+                    Date
+                </span>
+
+            </small>
+
+
+        </div>
+
+
+    </section>
+
+
+</div>
+
+
+</body>
+
+</html>
