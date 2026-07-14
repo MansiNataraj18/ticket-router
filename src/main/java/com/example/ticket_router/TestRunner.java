@@ -33,32 +33,62 @@ public class TestRunner implements CommandLineRunner {
 
     }
 
-   @Override
-    public void run(String... args) throws Exception {
-
-        String ticket =
-                "Customer cannot login to their account";
+  @Override
+public void run(String... args) throws Exception {
 
 
-        var vector = embeddingService.generate(ticket);
+    // Add historical ticket knowledge to Qdrant
+    String[] historicalTickets = {
+            "Customer cannot reset password",
+            "Customer cannot login to their account",
+            "Payment failed during checkout",
+            "Application crashes when opening dashboard",
+            "User wants accessibility features in the product"
+    };
 
 
-        System.out.println("Embedding size:");
-        System.out.println(vector.size());
+    for (String historicalTicket : historicalTickets) {
+
+        var historicalVector =
+                embeddingService.generate(historicalTicket);
+
 
         qdrantService.storeTicket(
-                ticket,
-                vector
+                historicalTicket,
+                historicalVector
         );
-
-        var result = ticketRoutingService.route(
-                "can you add a handicap accessibility feature to the product?"
-        );
-
-        System.out.println("Routing result:");
-        System.out.println(result);
-
     }
 
-}
 
+    // New incoming ticket
+    String newTicket =
+            "I forgot my password and cannot access my account";
+
+
+    var newVector =
+            embeddingService.generate(newTicket);
+
+
+    System.out.println("Embedding size:");
+    System.out.println(newVector.size());
+
+
+    // Search similar tickets
+    String similar =
+            qdrantService.findSimilarTickets(newVector);
+
+
+    System.out.println("Similar tickets:");
+    System.out.println(similar);
+
+
+    // Run AI routing with RAG context
+    var result =
+            ticketRoutingService.route(newTicket);
+
+
+    System.out.println("Routing result:");
+    System.out.println(result);
+
+}
+}

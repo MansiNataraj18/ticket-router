@@ -18,7 +18,11 @@ public class QdrantService {
         this.qdrantVectorClient = qdrantVectorClient;
     }
 
+    public String findSimilarTickets(List<Float> vector) {
 
+    return qdrantVectorClient.searchSimilarTickets(vector);
+
+}
     public void storeTicket(
             String ticketText,
             List<Float> vector

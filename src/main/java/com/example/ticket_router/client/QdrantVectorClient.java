@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
+//import java.util.Map;
 
 @Component
 public class QdrantVectorClient implements QdrantClient {
@@ -95,4 +96,25 @@ public void createCollection() {
         System.out.println("Ticket stored in Qdrant");
 
     }
+    public String searchSimilarTickets(List<Float> vector) {
+
+    String body = """
+            {
+              "vector": %s,
+              "limit": 3,
+              "with_payload": true
+            }
+            """.formatted(vector.toString());
+
+
+    return webClient.post()
+            .uri("/collections/" 
+                    + properties.getCollection()
+                    + "/points/search")
+            .bodyValue(body)
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
+
+}
 }
