@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import com.example.ticket_router.exception.InvalidTicketException;
+import com.example.ticket_router.exception.RoutingException;
 
 @Service
 public class EmbeddingService {
@@ -16,7 +18,50 @@ public class EmbeddingService {
     }
 
     public List<Float> generate(String text){
-        return embeddingClient.createEmbedding(text);
+
+
+    if(text == null || text.isBlank()) {
+
+        throw new InvalidTicketException(
+                "Cannot generate embedding for empty text"
+        );
+
     }
+
+
+    try {
+
+        List<Float> vector =
+                embeddingClient.createEmbedding(text);
+
+
+
+        if(vector == null || vector.isEmpty()) {
+
+            throw new RoutingException(
+                    "Embedding service returned an empty vector"
+            );
+
+        }
+
+
+        return vector;
+
+
+    } catch (RoutingException e) {
+
+        throw e;
+
+
+    } catch (Exception e) {
+
+        throw new RoutingException(
+                "Failed to generate ticket embedding",
+                e
+        );
+
+    }
+
+}
 
 }
