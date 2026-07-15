@@ -1,28 +1,50 @@
 package com.example.ticket_router.config;
 
+import com.example.ticket_router.entity.Role;
+import com.example.ticket_router.entity.User;
+import com.example.ticket_router.repository.UserRepository;
 import com.example.ticket_router.service.EmbeddingService;
 import com.example.ticket_router.service.QdrantService;
+
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+
 @Component
 public class DataInitializer implements CommandLineRunner {
 
+
     private final EmbeddingService embeddingService;
+
     private final QdrantService qdrantService;
+
+    private final UserRepository userRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
 
     public DataInitializer(
             EmbeddingService embeddingService,
-            QdrantService qdrantService
+            QdrantService qdrantService,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
     ) {
         this.embeddingService = embeddingService;
         this.qdrantService = qdrantService;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
+
 
     @Override
     public void run(String... args) {
+
+
+        createUsers();
+
 
         List<String> tickets = List.of(
                 "Customer cannot reset password",
@@ -32,16 +54,64 @@ public class DataInitializer implements CommandLineRunner {
                 "User wants accessibility features in the product"
         );
 
+
         for (String ticket : tickets) {
 
             List<Float> embedding =
                     embeddingService.generate(ticket);
 
-            qdrantService.storeTicket(ticket, embedding);
+
+            qdrantService.storeTicket(
+                    ticket,
+                    embedding
+            );
+
 
             System.out.println(
                     "Seeded ticket: " + ticket
             );
         }
+    }
+
+
+    private void createUsers() {
+
+
+        if (userRepository.count() > 0) {
+            return;
+        }
+
+
+        userRepository.save(
+                new User(
+                        "admin",
+                        passwordEncoder.encode("admin123"),
+                        "System Admin",
+                        Role.ADMIN
+                )
+        );
+
+
+        userRepository.save(
+                new User(
+                        "agent",
+                        passwordEncoder.encode("agent123"),
+                        "Support Agent",
+                        Role.AGENT
+                )
+        );
+
+
+        userRepository.save(
+                new User(
+                        "user",
+                        passwordEncoder.encode("user123"),
+                        "Normal User",
+                        Role.USER
+                )
+        );
+
+
+        System.out.println("Default users created");
     }
 }

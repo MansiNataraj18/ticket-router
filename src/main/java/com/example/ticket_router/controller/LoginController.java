@@ -1,4 +1,4 @@
-package com.example.ticket_router.controller;
+/*package com.example.ticket_router.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -75,5 +75,19 @@ session.setAttribute(
         session.invalidate();
 
         return "redirect:/login";
+    }
+}*/
+
+package com.example.ticket_router.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class LoginController {
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
     }
 }
