@@ -1,7 +1,9 @@
 package com.example.ticket_router.controller;
 
+//used to store session data
 import jakarta.servlet.http.HttpSession;
 
+//used for logging 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +17,7 @@ import com.example.ticket_router.repository.UserProfileRepository;
 @Controller
 public class LoginController {
 
-
+    //creates a logger for this class 
     private static final Logger log =
             LoggerFactory.getLogger(LoginController.class);
 
