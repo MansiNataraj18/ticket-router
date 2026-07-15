@@ -3,6 +3,9 @@ package com.example.ticket_router.controller;
 import com.example.ticket_router.entity.Ticket;
 import com.example.ticket_router.repository.TicketRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
@@ -14,6 +17,8 @@ import java.util.List;
 
 @Controller
 public class AdminController {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminController.class);
 
     private final TicketRepository ticketRepository;
 
@@ -43,10 +48,17 @@ public class AdminController {
 
         if (!isAdmin) {
 
+            log.warn(
+                    "Non-admin user '{}' attempted to access /admin",
+                    authentication != null ? authentication.getName() : "anonymous"
+            );
+
             return "redirect:/";
 
         }
 
+
+        log.info("Admin '{}' opened the admin dashboard", authentication.getName());
 
 
         List<Ticket> tickets =

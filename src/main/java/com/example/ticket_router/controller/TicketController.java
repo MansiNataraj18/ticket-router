@@ -9,6 +9,9 @@ import com.example.ticket_router.entity.UserProfile;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/tickets")
 public class TicketController {
 
+    private static final Logger log = LoggerFactory.getLogger(TicketController.class);
 
     private final TicketRoutingService service;
 
@@ -46,11 +50,22 @@ public class TicketController {
             Authentication authentication
     )  {
 
+        String username = authentication != null ? authentication.getName() : "anonymous";
+
+        log.info("User '{}' submitted a ticket for routing", username);
 
         TicketRoutingResult result =
                 service.route(
                         request.message()
                 );
+
+        log.info(
+                "Ticket routed for user '{}': category={}, priority={}, team={}",
+                username,
+                result.category(),
+                result.priority(),
+                result.assignedTeam()
+        );
 
 
         if (authentication != null && authentication.isAuthenticated()) {

@@ -1,6 +1,10 @@
 package com.example.ticket_router.service;
 
 import com.example.ticket_router.client.QdrantVectorClient;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,6 +16,7 @@ import com.example.ticket_router.exception.RoutingException;
 @Service
 public class QdrantService {
 
+    private static final Logger log = LoggerFactory.getLogger(QdrantService.class);
 
     private final QdrantVectorClient qdrantVectorClient;
 
@@ -41,15 +46,18 @@ public class QdrantService {
 
         if(result == null || result.isBlank()) {
 
+            log.debug("No similar tickets found in Qdrant");
+
             return "No similar historical tickets found.";
 
         }
-
 
         return result;
 
 
     } catch(Exception e) {
+
+        log.error("Qdrant similarity search failed: {}", e.getMessage(), e);
 
         throw new RoutingException(
                 "Failed to search similar tickets in Qdrant",
@@ -95,9 +103,12 @@ public class QdrantService {
                 vector
         );
 
+        log.debug("Stored ticket {} in Qdrant", id);
+
 
     } catch(Exception e) {
 
+        log.error("Failed to store ticket in Qdrant: {}", e.getMessage(), e);
 
         throw new RoutingException(
                 "Failed to store ticket in Qdrant",

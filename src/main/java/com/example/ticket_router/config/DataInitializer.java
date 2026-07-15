@@ -6,6 +6,9 @@ import com.example.ticket_router.repository.UserRepository;
 import com.example.ticket_router.service.EmbeddingService;
 import com.example.ticket_router.service.QdrantService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -16,6 +19,7 @@ import java.util.List;
 @Component
 public class DataInitializer implements CommandLineRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
     private final EmbeddingService embeddingService;
 
@@ -67,9 +71,7 @@ public class DataInitializer implements CommandLineRunner {
             );
 
 
-            System.out.println(
-                    "Seeded ticket: " + ticket
-            );
+            log.info("Seeded ticket: {}", ticket);
         }
     }
 
@@ -78,6 +80,7 @@ public class DataInitializer implements CommandLineRunner {
 
 
         if (userRepository.count() > 0) {
+            log.info("Users already exist, skipping default user seeding");
             return;
         }
 
@@ -112,6 +115,6 @@ public class DataInitializer implements CommandLineRunner {
         );
 
 
-        System.out.println("Default users created");
+        log.info("Default users created");
     }
 }

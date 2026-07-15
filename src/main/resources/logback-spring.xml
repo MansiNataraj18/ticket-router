@@ -4,6 +4,14 @@
 
     <property name="LOG_FILE" value="logs/ticket-router.log"/>
 
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+
+    </appender>
+
 
     <appender name="FILE"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -11,13 +19,17 @@
         <file>${LOG_FILE}</file>
 
         <rollingPolicy
-                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
 
             <fileNamePattern>
-                logs/ticket-router.%d{yyyy-MM-dd}.log
+                logs/ticket-router.%d{yyyy-MM-dd}.%i.log
             </fileNamePattern>
 
+            <maxFileSize>10MB</maxFileSize>
+
             <maxHistory>30</maxHistory>
+
+            <totalSizeCap>500MB</totalSizeCap>
 
         </rollingPolicy>
 
@@ -25,12 +37,7 @@
         <encoder>
 
             <pattern>
-                %d{yyyy-MM-dd HH:mm:ss}
-                [%thread]
-                %-5level
-                %logger{36}
-                -
-                %msg%n
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
 
         </encoder>
@@ -38,10 +45,13 @@
     </appender>
 
 
+    <logger name="com.example.ticket_router" level="INFO"/>
+
 
     <root level="INFO">
 
         <appender-ref ref="FILE"/>
+        <appender-ref ref="CONSOLE"/>
 
     </root>
 
