@@ -4,6 +4,7 @@ import com.example.ticket_router.entity.Ticket;
 import com.example.ticket_router.entity.UserProfile;
 import com.example.ticket_router.dto.TicketRoutingResult;
 import com.example.ticket_router.repository.TicketRepository;
+import com.example.ticket_router.exception.InvalidTicketException;
 
 import java.util.List;
 
@@ -26,13 +27,20 @@ public class TicketService {
 
 
     public Ticket saveTicket(
-            String message,
-            UserProfile userProfile,
-            TicketRoutingResult result
-    ) {
+        String message,
+        UserProfile userProfile,
+        TicketRoutingResult result
+) {
 
 
-        Ticket ticket = new Ticket();
+    validateTicketData(
+            message,
+            userProfile,
+            result
+    );
+
+
+    Ticket ticket = new Ticket();
 
 
         ticket.setMessage(message);
@@ -71,6 +79,52 @@ public class TicketService {
 
     return ticketRepository
             .findByUserProfileOrderByCreatedAtDesc(userProfile);
+
+}
+private void validateTicketData(
+        String message,
+        UserProfile userProfile,
+        TicketRoutingResult result
+) {
+
+
+    if(message == null || message.isBlank()) {
+
+        throw new InvalidTicketException(
+                "Cannot save an empty ticket"
+        );
+
+    }
+
+
+    if(userProfile == null) {
+
+        throw new InvalidTicketException(
+                "User information is missing"
+        );
+
+    }
+
+
+    if(result == null) {
+
+        throw new InvalidTicketException(
+                "Ticket routing result is missing"
+        );
+
+    }
+
+
+    if(result.category() == null ||
+       result.priority() == null ||
+       result.assignedTeam() == null) {
+
+
+        throw new InvalidTicketException(
+                "Incomplete routing result received"
+        );
+
+    }
 
 }
 
