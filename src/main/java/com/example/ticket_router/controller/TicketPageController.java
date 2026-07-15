@@ -4,9 +4,9 @@ package com.example.ticket_router.controller;
 import com.example.ticket_router.entity.Ticket;
 import com.example.ticket_router.entity.UserProfile;
 import com.example.ticket_router.service.TicketService;
+import com.example.ticket_router.service.UserProfileService;
 
-import jakarta.servlet.http.HttpSession;
-
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,13 +19,16 @@ public class TicketPageController {
 
 
     private final TicketService ticketService;
+    private final UserProfileService userProfileService;
 
 
     public TicketPageController(
-            TicketService ticketService
+            TicketService ticketService,
+            UserProfileService userProfileService
     ) {
 
         this.ticketService = ticketService;
+        this.userProfileService = userProfileService;
 
     }
 
@@ -33,23 +36,18 @@ public class TicketPageController {
 
     @GetMapping("/my-tickets")
     public String myTickets(
-            HttpSession session,
+            Authentication authentication,
             Model model
     ) {
 
-
-        UserProfile userProfile =
-                (UserProfile)
-                session.getAttribute(
-                        "userProfile"
-                );
-
-
-        if (userProfile == null) {
+        if (authentication == null || !authentication.isAuthenticated()) {
 
             return "redirect:/login";
 
         }
+
+        UserProfile userProfile =
+                userProfileService.getOrCreate(authentication.getName());
 
 
 

@@ -2,13 +2,14 @@ package com.example.ticket_router.controller;
 
 import com.example.ticket_router.service.TicketRoutingService;
 import com.example.ticket_router.service.TicketService;
+import com.example.ticket_router.service.UserProfileService;
 import com.example.ticket_router.dto.TicketRequest;
 import com.example.ticket_router.dto.TicketRoutingResult;
 import com.example.ticket_router.entity.UserProfile;
 
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,15 +22,19 @@ public class TicketController {
 
     private final TicketService ticketService;
 
+    private final UserProfileService userProfileService;
+
 
 
     public TicketController(
             TicketRoutingService service,
-            TicketService ticketService
+            TicketService ticketService,
+            UserProfileService userProfileService
     ) {
 
         this.service = service;
         this.ticketService = ticketService;
+        this.userProfileService = userProfileService;
 
     }
 
@@ -38,7 +43,7 @@ public class TicketController {
     @PostMapping("/route")
     public TicketRoutingResult route(
             @Valid @RequestBody TicketRequest request,
-            HttpSession session
+            Authentication authentication
     )  {
 
 
@@ -48,16 +53,12 @@ public class TicketController {
                 );
 
 
+        if (authentication != null && authentication.isAuthenticated()) {
 
-        UserProfile userProfile =
-                (UserProfile)
-                session.getAttribute(
-                        "userProfile"
-                );
-
-
-
-        if (userProfile != null) {
+            UserProfile userProfile =
+                    userProfileService.getOrCreate(
+                            authentication.getName()
+                    );
 
             ticketService.saveTicket(
                     request.message(),
@@ -66,7 +67,6 @@ public class TicketController {
             );
 
         }
-
 
 
         return result;

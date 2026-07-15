@@ -1,6 +1,6 @@
 package com.example.ticket_router.controller;
 
-import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,15 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class PageController {
 
     @GetMapping("/")
-    public String index(HttpSession session, Model model) {
+    public String index(Authentication authentication, Model model) {
 
-        String username = (String) session.getAttribute("username");
-
-        if (username == null) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/login";
         }
 
-        model.addAttribute("userName", username);
+        model.addAttribute("userName", authentication.getName());
 
         return "index";
     }
