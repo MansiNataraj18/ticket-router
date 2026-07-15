@@ -34,3 +34,5 @@ build/
 
 .env
 *.env
+logs/
+LOG_FILE_IS_UNDEFINED

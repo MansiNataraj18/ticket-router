@@ -25,6 +25,12 @@ public class OpenAiTicketRoutingClient implements TicketRoutingLlmClient {
     }
 
     //implements the routeTicket method from the TicketRoutingLlmClient interface, which takes a ticket message as input and returns a routing decision as output
+    /**
+     * Routes a ticket based on its message using the OpenAI API.
+     *
+     * @param ticketMessage the message of the ticket to route
+     * @return the routing decision for the ticket
+     */
     @Override
     public String routeTicket(String ticketMessage) {
         //constructs the request body for the OpenAI API call, including the model, system
@@ -51,12 +57,17 @@ public class OpenAiTicketRoutingClient implements TicketRoutingLlmClient {
                     )
             );
 
-
+            //Used to create a POST request to the OpenAI API's chat completions endpoint, sending the request body and retrieving the response as a String. The block() method is used to block the execution until the response is received.
             String response = webClient.post()
+            //specifies the endpoint for the OpenAI API's chat completions feature
                     .uri("/chat/completions")
+                    //converts java map into json automatically
                     .bodyValue(request)
+                    //sends the request
                     .retrieve()
+                    //response body should be converted to a string
                     .bodyToMono(String.class)
+                    //makes request synchronous 
                     .block();
 
 
