@@ -205,3 +205,23 @@ button:hover {
     margin-top:15px;
 
 }
+
+.link-button {
+
+    background:none;
+
+    border:none;
+
+    padding:0;
+
+    color:#2563eb;
+
+    text-decoration:underline;
+
+    font-size:inherit;
+
+    font-family:inherit;
+
+    cursor:pointer;
+
+}

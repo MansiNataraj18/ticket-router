@@ -5,12 +5,18 @@ import com.example.ticket_router.dto.TicketRoutingResult;
 import com.example.ticket_router.exception.InvalidTicketException;
 import com.example.ticket_router.exception.RoutingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class TicketRoutingService {
+
+    private static final Logger log = LoggerFactory.getLogger(TicketRoutingService.class);
 
     private final TicketRoutingLlmClient llmClient;
     private final ObjectMapper objectMapper;
@@ -37,6 +43,8 @@ public class TicketRoutingService {
         // 1. Validate input
         validateTicket(message);
 
+        log.debug("Routing ticket: {} characters", message.length());
+
 
         try {
 
@@ -49,6 +57,8 @@ public class TicketRoutingService {
             // 3. Search similar tickets
             String similarTickets =
                     qdrantService.findSimilarTickets(vector);
+
+            log.debug("Found similar tickets context for routing");
 
 
 
@@ -74,6 +84,8 @@ public class TicketRoutingService {
             String rawJson =
                     llmClient.routeTicket(enrichedMessage);
 
+            log.debug("Received LLM routing response");
+
 
 
             // 6. Parse response
@@ -85,6 +97,7 @@ public class TicketRoutingService {
 
         } catch (Exception e) {
 
+            log.error("Ticket routing failed: {}", e.getMessage(), e);
 
             throw new RoutingException(
                     "Failed to process ticket routing",

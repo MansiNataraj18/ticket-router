@@ -3,6 +3,9 @@ package com.example.ticket_router.exception;
 import com.example.ticket_router.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,11 +17,15 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(TicketNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleTicketNotFound(
             TicketNotFoundException ex,
             HttpServletRequest request
     ) {
+
+        log.warn("Ticket not found on {}: {}", request.getRequestURI(), ex.getMessage());
 
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
@@ -39,6 +46,8 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
 
+        log.warn("User not found on {}: {}", request.getRequestURI(), ex.getMessage());
+
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
@@ -57,6 +66,8 @@ public class GlobalExceptionHandler {
             InvalidTicketException ex,
             HttpServletRequest request
     ) {
+
+        log.warn("Invalid ticket request on {}: {}", request.getRequestURI(), ex.getMessage());
 
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
@@ -84,6 +95,8 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getDefaultMessage())
                 .orElse("Validation failed");
 
+        log.warn("Validation failed on {}: {}", request.getRequestURI(), message);
+
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
@@ -103,6 +116,8 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
 
+        log.error("Routing service failure on {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.SERVICE_UNAVAILABLE.value(),
@@ -121,6 +136,8 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
+
+        log.error("Unhandled exception on {}: {}", request.getRequestURI(), ex.getMessage(), ex);
 
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
