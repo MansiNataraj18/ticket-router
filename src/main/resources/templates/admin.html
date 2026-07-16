@@ -21,9 +21,50 @@
         <p>View all support tickets across every user.</p>
     </div>
 
+    <div class="card filter-bar">
+
+        <span class="filter-label">Priority:</span>
+
+        <div class="filter-group">
+
+            <a class="filter-pill"
+               th:classappend="${selectedPriority == null} ? ' active'"
+               th:href="@{/admin(sort=${selectedSort})}">All</a>
+
+            <a class="filter-pill"
+               th:classappend="${selectedPriority == 'HIGH'} ? ' active'"
+               th:href="@{/admin(priority='HIGH', sort=${selectedSort})}">High</a>
+
+            <a class="filter-pill"
+               th:classappend="${selectedPriority == 'MEDIUM'} ? ' active'"
+               th:href="@{/admin(priority='MEDIUM', sort=${selectedSort})}">Medium</a>
+
+            <a class="filter-pill"
+               th:classappend="${selectedPriority == 'LOW'} ? ' active'"
+               th:href="@{/admin(priority='LOW', sort=${selectedSort})}">Low</a>
+
+        </div>
+
+        <span class="filter-label">Sort:</span>
+
+        <div class="filter-group">
+
+            <a class="filter-pill"
+               th:classappend="${selectedSort == null} ? ' active'"
+               th:href="@{/admin(priority=${selectedPriority})}">Newest</a>
+
+            <a class="filter-pill"
+               th:classappend="${selectedSort == 'priority'} ? ' active'"
+               th:href="@{/admin(priority=${selectedPriority}, sort='priority')}">By Priority</a>
+
+        </div>
+
+    </div>
+
     <div th:if="${#lists.isEmpty(tickets)}" class="card empty-state">
 
-        <h3>No tickets available</h3>
+        <h3 th:if="${selectedPriority != null}" th:text="'No ' + ${selectedPriority} + ' priority tickets'">No tickets</h3>
+        <h3 th:if="${selectedPriority == null}">No tickets available</h3>
         <p>Tickets submitted by users will show up here.</p>
 
     </div>

@@ -7,6 +7,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.github.resilience4j.retry.annotation.Retry;
+
 import java.util.Map;
 import java.util.List;
 
@@ -41,12 +43,20 @@ public class OpenAiTicketRoutingClient implements TicketRoutingLlmClient {
 
     /**
      * Routes a ticket based on its message using the OpenAI chat completions API.
+     * <p>
+     * Annotated with {@link Retry @Retry}, which wraps this method in a
+     * Spring AOP proxy: on failure it is retried automatically according to
+     * the {@code resilience4j.retry.instances.openai} settings in
+     * {@code application.properties} (currently 3 attempts, 1s apart)
+     * before the exception is allowed to propagate.
      *
      * @param ticketMessage the (optionally RAG-enriched) message of the ticket to route
      * @return the raw JSON routing decision returned by the model
-     * @throws RoutingException if the OpenAI call fails or the response cannot be parsed
+     * @throws RoutingException if the OpenAI call still fails after all retry
+     *                           attempts, or the response cannot be parsed
      */
    @Override
+   @Retry(name = "openai")
 public String routeTicket(String ticketMessage) {
 
     try {

@@ -1,5 +1,6 @@
 package com.example.ticket_router.controller;
 
+import com.example.ticket_router.dto.Priority;
 import com.example.ticket_router.entity.Ticket;
 import com.example.ticket_router.repository.TicketRepository;
 
@@ -11,7 +12,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -48,14 +51,21 @@ public class AdminController {
     /**
      * Renders the admin dashboard listing all tickets, for admins only.
      *
-     * @param authentication the current request's authentication
-     * @param model          the Spring MVC model to populate for the view
+     * @param authentication  the current request's authentication
+     * @param priorityParam   optional priority filter ({@code HIGH}/{@code MEDIUM}/{@code LOW},
+     *                        case-insensitive); when absent or invalid, all tickets are shown
+     * @param sort            optional sort mode; {@code "priority"} orders by severity
+     *                        (HIGH &rarr; LOW, ties broken by newest first), anything else
+     *                        (or absent) orders by newest first
+     * @param model           the Spring MVC model to populate for the view
      * @return {@code "admin"} if the caller has {@code ROLE_ADMIN},
      *         otherwise a redirect to {@code /}
      */
     @GetMapping("/admin")
     public String adminDashboard(
             Authentication authentication,
+            @RequestParam(name = "priority", required = false) String priorityParam,
+            @RequestParam(name = "sort", required = false) String sort,
             Model model
     ) {
 
@@ -84,21 +94,62 @@ public class AdminController {
         model.addAttribute("isAdmin", true);
 
 
+        Priority priorityFilter = parsePriority(priorityParam);
+
         List<Ticket> tickets =
-                ticketRepository
-                        .findAll();
+                priorityFilter != null
+                        ? ticketRepository.findByPriority(priorityFilter)
+                        : ticketRepository.findAll();
 
+        boolean sortByPriority = "priority".equalsIgnoreCase(sort);
 
+        Comparator<Ticket> comparator =
+                sortByPriority
+                        ? Comparator.comparing((Ticket t) -> t.getPriority().ordinal())
+                                .reversed()
+                                .thenComparing(Ticket::getCreatedAt, Comparator.reverseOrder())
+                        : Comparator.comparing(Ticket::getCreatedAt, Comparator.reverseOrder());
 
-        model.addAttribute(
-                "tickets",
-                tickets
+        List<Ticket> sortedTickets = tickets.stream().sorted(comparator).toList();
+
+        log.debug(
+                "Admin dashboard: {} ticket(s) shown (priority filter={}, sort={})",
+                sortedTickets.size(),
+                priorityFilter,
+                sortByPriority ? "priority" : "newest"
         );
+
+
+        model.addAttribute("tickets", sortedTickets);
+        model.addAttribute("selectedPriority", priorityFilter != null ? priorityFilter.name() : null);
+        model.addAttribute("selectedSort", sortByPriority ? "priority" : null);
 
 
 
         return "admin";
 
+    }
+
+    /**
+     * Parses a priority filter query parameter into a {@link Priority},
+     * tolerating case differences and treating anything blank or unrecognized
+     * as "no filter".
+     *
+     * @param priorityParam the raw {@code priority} query parameter value, or {@code null}
+     * @return the matching {@link Priority}, or {@code null} if none was given or it was invalid
+     */
+    private Priority parsePriority(String priorityParam) {
+
+        if (priorityParam == null || priorityParam.isBlank()) {
+            return null;
+        }
+
+        try {
+            return Priority.valueOf(priorityParam.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Ignoring invalid priority filter value: '{}'", priorityParam);
+            return null;
+        }
     }
 
 }

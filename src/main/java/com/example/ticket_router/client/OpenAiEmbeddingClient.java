@@ -3,6 +3,8 @@ package com.example.ticket_router.client;
 
 import com.example.ticket_router.dto.EmbeddingResponse;
 
+import io.github.resilience4j.retry.annotation.Retry;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -37,12 +39,20 @@ public class OpenAiEmbeddingClient {
     /**
      * Requests an embedding vector for the given text from OpenAI's
      * {@code text-embedding-3-small} model.
+     * <p>
+     * Annotated with {@link Retry @Retry}, which wraps this method in a
+     * Spring AOP proxy: on failure it is retried automatically according to
+     * the {@code resilience4j.retry.instances.openai} settings in
+     * {@code application.properties} (currently 3 attempts, 1s apart)
+     * before the exception is allowed to propagate.
      *
      * @param text the text to embed
      * @return the embedding vector as a list of floats
-     * @throws RuntimeException if the OpenAI API call fails or returns a
-     *                           response with no embedding data
+     * @throws RuntimeException if the OpenAI API call still fails after all
+     *                           retry attempts, or returns a response with
+     *                           no embedding data
      */
+    @Retry(name = "openai")
     public List<Float> createEmbedding(String text) {
 
 
