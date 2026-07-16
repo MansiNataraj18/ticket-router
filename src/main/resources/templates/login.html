@@ -4,100 +4,20 @@
 <head>
     <title>Login</title>
 
-    <style>
-
-        body {
-            font-family: system-ui, sans-serif;
-            background: #f4f6f9;
-
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            height: 100vh;
-            margin: 0;
-        }
-
-        .card {
-            background: white;
-
-            padding: 30px;
-
-            width: 350px;
-
-            border-radius: 12px;
-
-            box-shadow: 0 8px 20px rgba(0,0,0,.1);
-        }
-
-        h2 {
-            text-align: center;
-        }
-
-        input {
-            width: 100%;
-
-            padding: 10px;
-
-            margin-top: 15px;
-
-            box-sizing: border-box;
-        }
-
-        button {
-            width: 100%;
-
-            margin-top: 20px;
-
-            padding: 12px;
-
-            background: #2563eb;
-
-            color: white;
-
-            border: none;
-
-            border-radius: 8px;
-
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #1d4ed8;
-        }
-
-        .error {
-            color: #dc2626;
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .success {
-            color: #16a34a;
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .switch-link {
-            text-align: center;
-            margin-top: 15px;
-        }
-
-    </style>
-
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
-<body>
+<body class="auth-page">
 
-<div class="card">
+<div class="auth-card">
 
-    <h2>Smart Ticket Router</h2>
+    <h2>🎫 Smart Ticket Router</h2>
 
-    <p class="error" th:if="${param.error}">Invalid username or password.</p>
+    <p class="alert alert-error" th:if="${param.error}">Invalid username or password.</p>
 
-    <p class="success" th:if="${param.signup}">Account created. Please log in.</p>
+    <p class="alert alert-success" th:if="${param.signup}">Account created. Please log in.</p>
 
-    <p class="success" th:if="${param.logout}">You have been logged out.</p>
+    <p class="alert alert-success" th:if="${param.logout}">You have been logged out.</p>
 
     <form th:action="@{/login}" method="post">
 

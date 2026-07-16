@@ -12,6 +12,13 @@ import java.util.List;
 import com.example.ticket_router.exception.InvalidTicketException;
 import com.example.ticket_router.exception.RoutingException;
 
+/**
+ * Thin validation/error-translation layer over {@link OpenAiEmbeddingClient}.
+ * <p>
+ * Ensures callers never receive a null or empty embedding without an
+ * explicit exception, and wraps any client-level failure in a
+ * {@link RoutingException} so callers only need to handle one exception type.
+ */
 @Service
 public class EmbeddingService {
 
@@ -19,10 +26,21 @@ public class EmbeddingService {
 
     private final OpenAiEmbeddingClient embeddingClient;
 
+    /**
+     * @param embeddingClient the underlying OpenAI embeddings client
+     */
     public EmbeddingService(OpenAiEmbeddingClient embeddingClient){
         this.embeddingClient = embeddingClient;
     }
 
+    /**
+     * Generates an embedding vector for the given text.
+     *
+     * @param text the text to embed; must not be null or blank
+     * @return a non-empty embedding vector
+     * @throws InvalidTicketException if {@code text} is null or blank
+     * @throws RoutingException if the embedding client fails or returns an empty vector
+     */
     public List<Float> generate(String text){
 
 

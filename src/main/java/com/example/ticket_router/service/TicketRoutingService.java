@@ -13,6 +13,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Orchestrates the end-to-end Retrieval-Augmented Generation (RAG) pipeline
+ * used to classify a support ticket.
+ * <p>
+ * The pipeline is: validate the message, embed it ({@link EmbeddingService}),
+ * search for similar historical tickets ({@link QdrantService}), build an
+ * enriched prompt from both, send it to the LLM ({@link
+ * TicketRoutingLlmClient}), and parse the JSON reply into a {@link
+ * TicketRoutingResult}.
+ */
 @Service
 public class TicketRoutingService {
 
@@ -24,6 +34,12 @@ public class TicketRoutingService {
     private final QdrantService qdrantService;
 
 
+    /**
+     * @param llmClient        performs the final classification call to the LLM
+     * @param objectMapper     used to parse the LLM's JSON response into a {@link TicketRoutingResult}
+     * @param embeddingService generates the embedding vector for the incoming ticket
+     * @param qdrantService    finds similar historical tickets for RAG context
+     */
     public TicketRoutingService(
             TicketRoutingLlmClient llmClient,
             ObjectMapper objectMapper,
@@ -37,6 +53,17 @@ public class TicketRoutingService {
     }
 
 
+    /**
+     * Classifies a support ticket message using the RAG pipeline described in
+     * the class-level documentation.
+     *
+     * @param message the raw ticket message text
+     * @return the parsed category, priority, assigned team, and reasoning
+     * @throws InvalidTicketException if {@code message} is null, blank, or
+     *         outside the 10-5000 character range
+     * @throws RoutingException if embedding generation, the Qdrant search, the
+     *         LLM call, or parsing the LLM's response fails
+     */
     public TicketRoutingResult route(String message) {
 
 

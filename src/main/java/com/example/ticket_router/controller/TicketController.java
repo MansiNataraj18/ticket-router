@@ -16,6 +16,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
+/**
+ * REST endpoint that classifies (routes) a support ticket using the
+ * Retrieval-Augmented Generation pipeline in {@link TicketRoutingService},
+ * and persists the ticket against the caller's profile if they're logged in.
+ */
 @RestController
 @RequestMapping("/api/tickets")
 public class TicketController {
@@ -30,6 +35,12 @@ public class TicketController {
 
 
 
+    /**
+     * @param service             performs the embed &rarr; search &rarr; LLM routing pipeline
+     * @param ticketService       persists routed tickets against a {@link
+     *                            com.example.ticket_router.entity.UserProfile}
+     * @param userProfileService  resolves (or creates) the profile for the authenticated user
+     */
     public TicketController(
             TicketRoutingService service,
             TicketService ticketService,
@@ -44,6 +55,19 @@ public class TicketController {
 
 
 
+    /**
+     * Classifies the submitted ticket message and, if the caller is
+     * authenticated, saves the ticket to their history.
+     *
+     * @param request        the incoming ticket, containing the raw message text
+     * @param authentication the current request's authentication, or {@code null}
+     *                        if the caller is anonymous
+     * @return the AI-generated category, priority, assigned team, and reasoning
+     * @throws com.example.ticket_router.exception.InvalidTicketException if the message
+     *         fails validation (blank, too short, or too long)
+     * @throws com.example.ticket_router.exception.RoutingException if the embedding,
+     *         Qdrant search, or LLM call fails
+     */
     @PostMapping("/route")
     public TicketRoutingResult route(
             @Valid @RequestBody TicketRequest request,

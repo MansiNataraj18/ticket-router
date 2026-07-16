@@ -2,31 +2,9 @@
 
 <configuration>
 
+    <property name="LOG_FILE" value="logs/ticket-router.log"/>
 
     <!-- Console logging -->
-    <!--name is the identifier for the appender , telling us where to send the log messages -->
-    <appender name="CONSOLE"
-              class="ch.qos.logback.core.ConsoleAppender">
-
-        <!--converts log messages to a string -->
-        <encoder>
-
-            <pattern>
-                <!--date and time-->
-                %d{yyyy-MM-dd HH:mm:ss}
-                <!--log level i.e INFO, WARN, ERROR, DEBUG, -5 means left aligned with width 5 -->
-                %-5level
-                <!--if logger name is longer than 36 characters, it will be abbreviated -->
-                %logger{36}
-                -
-                <!--print message and go to new line-->
-                %msg%n
-            </pattern>
-
-        </encoder>
-
-    </appender>
-
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 
         <encoder>
@@ -36,12 +14,13 @@
     </appender>
 
 
-
     <!-- File logging -->
     <appender name="FILE"
-              class="ch.qos.logback.core.FileAppender">
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
 
         <file>${LOG_FILE}</file>
+
+        <append>true</append>
 
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
@@ -58,43 +37,21 @@
 
         </rollingPolicy>
 
-        <append>true</append>
-
         <encoder>
-
-            <pattern>
-<<<<<<< HEAD
-                %d{yyyy-MM-dd HH:mm:ss}
-                %-5level
-                %logger{36}
-                -
-                %msg%n
-=======
-                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
->>>>>>> feature/spring-security
-            </pattern>
-
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
 
     </appender>
 
 
-    <logger name="com.example.ticket_router" level="INFO"/>
-
-
-
     <!-- Application logs -->
-    <logger name="com.example.ticket_router"
-            level="INFO"/>
-
+    <logger name="com.example.ticket_router" level="INFO"/>
 
 
     <root level="INFO">
 
         <appender-ref ref="CONSOLE"/>
-
         <appender-ref ref="FILE"/>
-        <appender-ref ref="CONSOLE"/>
 
     </root>
 

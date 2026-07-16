@@ -13,6 +13,11 @@ import java.util.UUID;
 import com.example.ticket_router.exception.InvalidTicketException;
 import com.example.ticket_router.exception.RoutingException;
 
+/**
+ * Validation/error-translation layer over {@link QdrantVectorClient}, used
+ * to both find similar historical tickets (for RAG context) and persist new
+ * ticket embeddings.
+ */
 @Service
 public class QdrantService {
 
@@ -21,10 +26,23 @@ public class QdrantService {
     private final QdrantVectorClient qdrantVectorClient;
 
 
+    /**
+     * @param qdrantVectorClient the underlying Qdrant HTTP client
+     */
     public QdrantService(QdrantVectorClient qdrantVectorClient) {
         this.qdrantVectorClient = qdrantVectorClient;
     }
 
+    /**
+     * Finds historical tickets similar to the given embedding vector, for use
+     * as RAG context in ticket routing.
+     *
+     * @param vector the embedding vector to search against
+     * @return the raw JSON search results from Qdrant, or a human-readable
+     *         fallback message if no similar tickets were found
+     * @throws InvalidTicketException if {@code vector} is null or empty
+     * @throws RoutingException if the underlying Qdrant search call fails
+     */
     public String findSimilarTickets(List<Float> vector) {
 
 
@@ -67,6 +85,16 @@ public class QdrantService {
     }
 
 }
+
+    /**
+     * Stores a ticket's text and embedding vector in Qdrant, generating a new
+     * random point ID for it.
+     *
+     * @param ticketText the ticket message to store as payload
+     * @param vector     the embedding vector for {@code ticketText}
+     * @throws InvalidTicketException if {@code ticketText} or {@code vector} is null/empty
+     * @throws RoutingException if the underlying Qdrant write fails
+     */
     public void storeTicket(
         String ticketText,
         List<Float> vector

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 
 
+/**
+ * Serves the "My Tickets" page, showing a signed-in user's own ticket
+ * submission history.
+ */
 @Controller
 public class TicketPageController {
 
@@ -26,6 +31,12 @@ public class TicketPageController {
     private final UserProfileService userProfileService;
 
 
+    /**
+     * @param ticketService       used to look up tickets belonging to the current user
+     * @param userProfileService  used to resolve (or create) the {@link
+     *                            com.example.ticket_router.entity.UserProfile}
+     *                            associated with the authenticated username
+     */
     public TicketPageController(
             TicketService ticketService,
             UserProfileService userProfileService
@@ -38,6 +49,14 @@ public class TicketPageController {
 
 
 
+    /**
+     * Renders the authenticated user's ticket history.
+     *
+     * @param authentication the current request's authentication, or {@code null}/unauthenticated
+     *                        if no user is logged in
+     * @param model          the Spring MVC model to populate for the view
+     * @return {@code "my-tickets"} if authenticated, otherwise a redirect to {@code /login}
+     */
     @GetMapping("/my-tickets")
     public String myTickets(
             Authentication authentication,
@@ -53,6 +72,13 @@ public class TicketPageController {
         }
 
         log.info("User '{}' viewed their ticket history", authentication.getName());
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(authority -> authority.equals("ROLE_ADMIN"));
+
+        model.addAttribute("userName", authentication.getName());
+        model.addAttribute("isAdmin", isAdmin);
 
         UserProfile userProfile =
                 userProfileService.getOrCreate(authentication.getName());

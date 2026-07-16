@@ -12,26 +12,39 @@ import java.util.List;
 
 import com.example.ticket_router.exception.RoutingException;
 
-//registers this class as a Spring Component, allowing it to create beans
+/**
+ * {@link TicketRoutingLlmClient} implementation backed by an OpenAI chat
+ * completion model.
+ * <p>
+ * Sends the ticket message together with {@link TicketRoutingPrompt#SYSTEM_PROMPT}
+ * as a JSON-mode chat request, and returns the raw JSON content of the
+ * model's reply for the caller to parse into a {@link
+ * com.example.ticket_router.dto.TicketRoutingResult}.
+ */
 @Component
 public class OpenAiTicketRoutingClient implements TicketRoutingLlmClient {
 
     private final WebClient webClient;
-    //objectMapper is a class from the Jackson library that provides functionality for converting between Java objects and JSON. It is used to parse the JSON response from the OpenAI API into a JsonNode object, which can then be traversed to extract the relevant information.
+
+    /** Used to parse the OpenAI chat completion response into a {@link JsonNode}. */
     private final ObjectMapper objectMapper;
 
-    //dependency injection by injecting construstor parameters
+    /**
+     * @param openAiWebClient a {@link WebClient} pre-configured with the OpenAI
+     *                         base URL and {@code Authorization} header
+     * @param objectMapper    Jackson mapper used to read the raw API response
+     */
     public OpenAiTicketRoutingClient(WebClient openAiWebClient, ObjectMapper objectMapper) {
         this.webClient = openAiWebClient;
         this.objectMapper = objectMapper;
     }
 
-    //implements the routeTicket method from the TicketRoutingLlmClient interface, which takes a ticket message as input and returns a routing decision as output
     /**
-     * Routes a ticket based on its message using the OpenAI API.
+     * Routes a ticket based on its message using the OpenAI chat completions API.
      *
-     * @param ticketMessage the message of the ticket to route
-     * @return the routing decision for the ticket
+     * @param ticketMessage the (optionally RAG-enriched) message of the ticket to route
+     * @return the raw JSON routing decision returned by the model
+     * @throws RoutingException if the OpenAI call fails or the response cannot be parsed
      */
    @Override
 public String routeTicket(String ticketMessage) {

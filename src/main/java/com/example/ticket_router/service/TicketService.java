@@ -10,6 +10,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+/**
+ * Persists submitted tickets and retrieves a given user's ticket history.
+ */
 @Service
 public class TicketService {
 
@@ -17,6 +20,9 @@ public class TicketService {
     private final TicketRepository ticketRepository;
 
 
+    /**
+     * @param ticketRepository repository used to persist and query tickets
+     */
     public TicketService(
             TicketRepository ticketRepository
     ) {
@@ -26,6 +32,16 @@ public class TicketService {
     }
 
 
+    /**
+     * Saves a newly routed ticket against the given user profile.
+     *
+     * @param message     the original ticket message
+     * @param userProfile the profile of the user who submitted the ticket
+     * @param result      the AI-generated category, priority, team, and reasoning
+     * @return the persisted {@link Ticket}, including its generated ID
+     * @throws InvalidTicketException if {@code message} is blank, {@code userProfile}
+     *         is null, or {@code result} is null/incomplete
+     */
     public Ticket saveTicket(
         String message,
         UserProfile userProfile,
@@ -73,6 +89,13 @@ public class TicketService {
         return ticketRepository.save(ticket);
 
     }
+
+    /**
+     * Retrieves a user's submitted tickets, most recent first.
+     *
+     * @param userProfile the profile to look up tickets for
+     * @return the user's tickets ordered by creation date, descending
+     */
     public List<Ticket> getTicketsForUser(
         UserProfile userProfile
 ) {

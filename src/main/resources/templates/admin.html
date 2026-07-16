@@ -12,172 +12,63 @@
 
 <body>
 
+<div th:replace="~{fragments/navbar :: navbar(activePage='admin', userName=${userName}, isAdmin=${isAdmin})}"></div>
 
 <div class="container">
 
+    <div class="page-header">
+        <h1>Admin Dashboard</h1>
+        <p>View all support tickets across every user.</p>
+    </div>
 
-<header class="top-bar">
+    <div th:if="${#lists.isEmpty(tickets)}" class="card empty-state">
+
+        <h3>No tickets available</h3>
+        <p>Tickets submitted by users will show up here.</p>
+
+    </div>
 
 
-    <div>
+    <div th:each="ticket : ${tickets}"
+         class="ticket-card">
 
-        <h1>🛠 Admin Dashboard</h1>
+        <h3>
+            User:
+            <span th:text="${ticket.userProfile.name}">username</span>
+        </h3>
 
         <p>
-            View all support tickets
+            <strong>Message:</strong>
+            <span th:text="${ticket.message}">message</span>
         </p>
 
-    </div>
-
-
-    <div>
-
-        <form th:action="@{/logout}" method="post" style="display:inline">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-            <button type="submit" class="link-button">Logout</button>
-        </form>
-
-    </div>
-
-
-</header>
-
-
-
-
-
-<section class="card">
-
-
-<h2>
-    All Tickets
-</h2>
-
-
-
-
-<div th:if="${#lists.isEmpty(tickets)}">
-
-    <p>
-        No tickets available.
-    </p>
-
-</div>
-
-
-
-
-
-<div th:each="ticket : ${tickets}"
-     class="ticket-card">
-
-
-    <h3>
-
-        User:
-
-        <span th:text="${ticket.userProfile.name}">
-            username
-        </span>
-
-    </h3>
-
-
-
-
-    <p>
-
-        <strong>
-            Message:
-        </strong>
-
-        <span th:text="${ticket.message}">
-            message
-        </span>
-
-    </p>
-
-
-
-
-    <p>
-
-        <strong>
-            Category:
-        </strong>
-
-        <span th:text="${ticket.category}">
-            category
-        </span>
-
-    </p>
-
-
-
-
-    <p>
-
-        <strong>
-            Priority:
-        </strong>
-
-        <span th:text="${ticket.priority}">
-            priority
-        </span>
-
-    </p>
-
-
-
-
-    <p>
-
-        <strong>
-            Assigned Team:
-        </strong>
-
-        <span th:text="${ticket.assignedTeam}">
-            team
-        </span>
-
-    </p>
-
-
-
-
-    <div class="reasoning">
-
-        <h4>
-            AI Reasoning
-        </h4>
-
-        <p th:text="${ticket.reasoning}">
-            reasoning
+        <p>
+            <strong>Category:</strong>
+            <span th:text="${ticket.category}">category</span>
         </p>
 
+        <p>
+            <strong>Priority:</strong>
+            <span th:text="${ticket.priority}"
+                  th:classappend="${#strings.toLowerCase(ticket.priority)}">priority</span>
+        </p>
+
+        <p>
+            <strong>Assigned Team:</strong>
+            <span th:text="${ticket.assignedTeam}">team</span>
+        </p>
+
+        <div class="reasoning">
+            <h4 style="margin-top:0;">AI Reasoning</h4>
+            <p th:text="${ticket.reasoning}" style="margin:0;">reasoning</p>
+        </div>
+
+        <small style="color:var(--color-text-muted);">
+            Created:
+            <span th:text="${ticket.createdAt}">date</span>
+        </small>
+
     </div>
-
-
-
-
-    <small>
-
-        Created:
-
-        <span th:text="${ticket.createdAt}">
-            date
-        </span>
-
-    </small>
-
-
-
-</div>
-
-
-
-</section>
-
 
 
 </div>

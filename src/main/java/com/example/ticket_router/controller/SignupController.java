@@ -16,6 +16,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
+/**
+ * Handles self-service account registration.
+ * <p>
+ * New accounts are always created with {@link Role#USER}; there is
+ * intentionally no way for a caller to self-assign {@code ADMIN} or
+ * {@code AGENT} through this endpoint.
+ */
 @Controller
 public class SignupController {
 
@@ -26,6 +33,10 @@ public class SignupController {
     private final PasswordEncoder passwordEncoder;
 
 
+    /**
+     * @param userRepository   used to check for existing usernames and persist new users
+     * @param passwordEncoder  used to hash the submitted password before storage
+     */
     public SignupController(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder
@@ -35,12 +46,25 @@ public class SignupController {
     }
 
 
+    /**
+     * @return the {@code signup} view template
+     */
     @GetMapping("/signup")
     public String signupPage() {
         return "signup";
     }
 
 
+    /**
+     * Validates and creates a new {@code ROLE_USER} account.
+     *
+     * @param username the desired, unique username
+     * @param password the plaintext password, hashed with {@link PasswordEncoder} before storage
+     * @param fullName the user's display name
+     * @param model    the Spring MVC model, populated with an {@code error} attribute on failure
+     * @return a redirect to {@code /login?signup} on success, otherwise back to the
+     *         {@code signup} view with an error message
+     */
     @PostMapping("/signup")
     public String signup(
             @RequestParam String username,

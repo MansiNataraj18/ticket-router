@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<header th:fragment="navbar(activePage, userName, isAdmin)" class="navbar">
+
+    <div class="navbar-inner">
+
+        <a href="/" class="brand">🎫 Smart Ticket Router</a>
+
+        <nav class="nav-links">
+
+            <a href="/" th:classappend="${activePage == 'submit'} ? 'active'">Submit Ticket</a>
+
+            <a href="/my-tickets" th:classappend="${activePage == 'my-tickets'} ? 'active'">My Tickets</a>
+
+            <a href="/admin" th:if="${isAdmin}" th:classappend="${activePage == 'admin'} ? 'active'">Admin</a>
+
+        </nav>
+
+        <div class="navbar-user">
+
+            <span class="user-name" th:text="${userName}"></span>
+
+            <form th:action="@{/logout}" method="post" style="display:inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="link-button">Logout</button>
+            </form>
+
+        </div>
+
+    </div>
+
+</header>
+
+</body>
+</html>

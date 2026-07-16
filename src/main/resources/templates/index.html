@@ -12,53 +12,22 @@
 
 <body>
 
+<div th:replace="~{fragments/navbar :: navbar(activePage='submit', userName=${userName}, isAdmin=${isAdmin})}"></div>
+
 <div class="container">
 
-
-    <header class="top-bar">
-
-        <div>
-            <h1>🎫 Smart Ticket Router</h1>
-
-            <p>
-                AI-powered support ticket classification using RAG
-            </p>
-        </div>
-
-
-        <div class="user-section">
-
-            <span>
-                Welcome,
-                <strong th:text="${userName}"></strong>
-            </span>
-
-            <br>
-
-            <form th:action="@{/logout}" method="post" style="display:inline">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <button type="submit" class="link-button">Logout</button>
-            </form>
-
-            <a href="/my-tickets">
-    My Tickets
-</a>
-
-        </div>
-
-    </header>
-
-
+    <div class="page-header">
+        <h1>Submit a Ticket</h1>
+        <p>Describe the issue and let AI classify it using similar past tickets.</p>
+    </div>
 
     <section class="card">
 
-        <h2>Submit Ticket</h2>
-
+        <h2>New Ticket</h2>
 
         <textarea
             id="message"
             placeholder="Describe the customer's issue..."></textarea>
-
 
         <button onclick="routeTicket()">
             Analyze Ticket
@@ -67,11 +36,9 @@
     </section>
 
 
-
-
     <section
         id="result"
-        class="card result"
+        class="card"
         style="display:none;">
 
 
@@ -80,56 +47,29 @@
 
         <div class="grid">
 
-
             <div class="field">
-
-                <label>
-                    Category
-                </label>
-
+                <label>Category</label>
                 <span id="category"></span>
-
             </div>
 
-
-
             <div class="field">
-
-                <label>
-                    Priority
-                </label>
-
+                <label>Priority</label>
                 <span id="priority"></span>
-
             </div>
-
-
 
             <div class="field">
-
-                <label>
-                    Assigned Team
-                </label>
-
+                <label>Assigned Team</label>
                 <span id="team"></span>
-
             </div>
-
 
         </div>
 
 
-
-
         <div class="reasoning">
 
-            <h3>
-                AI Reasoning
-            </h3>
+            <h3 style="margin-top:0;">AI Reasoning</h3>
 
-
-            <p id="reasoning"></p>
-
+            <p id="reasoning" style="margin:0;"></p>
 
         </div>
 
@@ -140,57 +80,36 @@
 </div>
 
 
-
-
-
 <script>
 
 async function routeTicket() {
-
 
     const message =
         document
             .getElementById("message")
             .value;
 
-
-
     if (!message.trim()) {
-
-        alert(
-            "Please enter a ticket message"
-        );
-
+        alert("Please enter a ticket message");
         return;
-
     }
-
-
 
     const result =
         document.getElementById("result");
 
-
-
     result.style.display = "block";
-
-
 
     document
         .getElementById("reasoning")
         .innerText =
         "Analyzing with AI...";
 
-
-
     try {
-
 
         const response =
             await fetch(
                 "/api/tickets/route",
                 {
-
                     method:"POST",
 
                     headers:{
@@ -200,90 +119,40 @@ async function routeTicket() {
                     },
 
                     body:JSON.stringify({
-
                         message:message
-
                     })
-
                 }
             );
 
-
-
         if (!response.ok) {
-
-            throw new Error(
-                "Request failed: "
-                + response.status
-            );
-
+            throw new Error("Request failed: " + response.status);
         }
-
-
 
         const data =
             await response.json();
 
-
-
-
-        document
-            .getElementById("category")
-            .innerText =
-            data.category;
-
-
-
-
-        document
-            .getElementById("priority")
-            .innerText =
-            data.priority;
-
-
-
-
-        document
-            .getElementById("team")
-            .innerText =
-            data.assignedTeam;
-
-
-
-
-        document
-            .getElementById("reasoning")
-            .innerText =
-            data.reasoning;
-
-
-
+        document.getElementById("category").innerText = data.category;
+        document.getElementById("priority").innerText = data.priority;
+        document.getElementById("team").innerText = data.assignedTeam;
+        document.getElementById("reasoning").innerText = data.reasoning;
 
         document
             .getElementById("priority")
             .className =
             data.priority.toLowerCase();
 
-
-
     }
 
-
     catch(error) {
-
 
         document
             .getElementById("reasoning")
             .innerText =
-            "Error: "
-            + error.message;
-
+            "Error: " + error.message;
 
     }
 
-
 }
-
 
 </script>
 
