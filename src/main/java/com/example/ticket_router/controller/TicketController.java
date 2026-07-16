@@ -2,10 +2,11 @@ package com.example.ticket_router.controller;
 
 import com.example.ticket_router.service.TicketRoutingService;
 import com.example.ticket_router.service.TicketService;
-import com.example.ticket_router.service.UserProfileService;
 import com.example.ticket_router.dto.TicketRequest;
 import com.example.ticket_router.dto.TicketRoutingResult;
-import com.example.ticket_router.entity.UserProfile;
+import com.example.ticket_router.entity.User;
+import com.example.ticket_router.exception.UserNotFoundException;
+import com.example.ticket_router.repository.UserRepository;
 
 import jakarta.validation.Valid;
 
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * REST endpoint that classifies (routes) a support ticket using the
  * Retrieval-Augmented Generation pipeline in {@link TicketRoutingService},
- * and persists the ticket against the caller's profile if they're logged in.
+ * and persists the ticket against the caller's account if they're logged in.
  */
 @RestController
 @RequestMapping("/api/tickets")
@@ -31,25 +32,25 @@ public class TicketController {
 
     private final TicketService ticketService;
 
-    private final UserProfileService userProfileService;
+    private final UserRepository userRepository;
 
 
 
     /**
-     * @param service             performs the embed &rarr; search &rarr; LLM routing pipeline
-     * @param ticketService       persists routed tickets against a {@link
-     *                            com.example.ticket_router.entity.UserProfile}
-     * @param userProfileService  resolves (or creates) the profile for the authenticated user
+     * @param service        performs the embed &rarr; search &rarr; LLM routing pipeline
+     * @param ticketService  persists routed tickets against a {@link
+     *                       com.example.ticket_router.entity.User}
+     * @param userRepository looks up the authenticated user's account
      */
     public TicketController(
             TicketRoutingService service,
             TicketService ticketService,
-            UserProfileService userProfileService
+            UserRepository userRepository
     ) {
 
         this.service = service;
         this.ticketService = ticketService;
-        this.userProfileService = userProfileService;
+        this.userRepository = userRepository;
 
     }
 
@@ -67,6 +68,8 @@ public class TicketController {
      *         fails validation (blank, too short, or too long)
      * @throws com.example.ticket_router.exception.RoutingException if the embedding,
      *         Qdrant search, or LLM call fails
+     * @throws UserNotFoundException if the caller is authenticated but their
+     *         account can no longer be found
      */
     @PostMapping("/route")
     public TicketRoutingResult route(
@@ -94,14 +97,13 @@ public class TicketController {
 
         if (authentication != null && authentication.isAuthenticated()) {
 
-            UserProfile userProfile =
-                    userProfileService.getOrCreate(
-                            authentication.getName()
-                    );
+            User user =
+                    userRepository.findByUsername(authentication.getName())
+                            .orElseThrow(() -> new UserNotFoundException(authentication.getName()));
 
             ticketService.saveTicket(
                     request.message(),
-                    userProfile,
+                    user,
                     result
             );
 

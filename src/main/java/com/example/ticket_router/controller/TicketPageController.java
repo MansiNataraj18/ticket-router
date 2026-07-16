@@ -2,9 +2,10 @@ package com.example.ticket_router.controller;
 
 
 import com.example.ticket_router.entity.Ticket;
-import com.example.ticket_router.entity.UserProfile;
+import com.example.ticket_router.entity.User;
+import com.example.ticket_router.exception.UserNotFoundException;
+import com.example.ticket_router.repository.UserRepository;
 import com.example.ticket_router.service.TicketService;
-import com.example.ticket_router.service.UserProfileService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,22 +29,21 @@ public class TicketPageController {
     private static final Logger log = LoggerFactory.getLogger(TicketPageController.class);
 
     private final TicketService ticketService;
-    private final UserProfileService userProfileService;
+    private final UserRepository userRepository;
 
 
     /**
-     * @param ticketService       used to look up tickets belonging to the current user
-     * @param userProfileService  used to resolve (or create) the {@link
-     *                            com.example.ticket_router.entity.UserProfile}
-     *                            associated with the authenticated username
+     * @param ticketService  used to look up tickets belonging to the current user
+     * @param userRepository used to look up the {@link User} associated with
+     *                       the authenticated username
      */
     public TicketPageController(
             TicketService ticketService,
-            UserProfileService userProfileService
+            UserRepository userRepository
     ) {
 
         this.ticketService = ticketService;
-        this.userProfileService = userProfileService;
+        this.userRepository = userRepository;
 
     }
 
@@ -56,6 +56,8 @@ public class TicketPageController {
      *                        if no user is logged in
      * @param model          the Spring MVC model to populate for the view
      * @return {@code "my-tickets"} if authenticated, otherwise a redirect to {@code /login}
+     * @throws UserNotFoundException if the caller is authenticated but their
+     *         account can no longer be found
      */
     @GetMapping("/my-tickets")
     public String myTickets(
@@ -80,15 +82,16 @@ public class TicketPageController {
         model.addAttribute("userName", authentication.getName());
         model.addAttribute("isAdmin", isAdmin);
 
-        UserProfile userProfile =
-                userProfileService.getOrCreate(authentication.getName());
+        User user =
+                userRepository.findByUsername(authentication.getName())
+                        .orElseThrow(() -> new UserNotFoundException(authentication.getName()));
 
 
 
         List<Ticket> tickets =
                 ticketService
                         .getTicketsForUser(
-                                userProfile
+                                user
                         );
 
 

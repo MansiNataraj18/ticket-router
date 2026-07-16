@@ -1,7 +1,7 @@
 package com.example.ticket_router.service;
 
 import com.example.ticket_router.entity.Ticket;
-import com.example.ticket_router.entity.UserProfile;
+import com.example.ticket_router.entity.User;
 import com.example.ticket_router.dto.TicketRoutingResult;
 import com.example.ticket_router.repository.TicketRepository;
 import com.example.ticket_router.exception.InvalidTicketException;
@@ -33,25 +33,25 @@ public class TicketService {
 
 
     /**
-     * Saves a newly routed ticket against the given user profile.
+     * Saves a newly routed ticket against the given user.
      *
-     * @param message     the original ticket message
-     * @param userProfile the profile of the user who submitted the ticket
-     * @param result      the AI-generated category, priority, team, and reasoning
+     * @param message the original ticket message
+     * @param user    the user who submitted the ticket
+     * @param result  the AI-generated category, priority, team, and reasoning
      * @return the persisted {@link Ticket}, including its generated ID
-     * @throws InvalidTicketException if {@code message} is blank, {@code userProfile}
+     * @throws InvalidTicketException if {@code message} is blank, {@code user}
      *         is null, or {@code result} is null/incomplete
      */
     public Ticket saveTicket(
         String message,
-        UserProfile userProfile,
+        User user,
         TicketRoutingResult result
 ) {
 
 
     validateTicketData(
             message,
-            userProfile,
+            user,
             result
     );
 
@@ -81,8 +81,8 @@ public class TicketService {
         );
 
 
-        ticket.setUserProfile(
-                userProfile
+        ticket.setUser(
+                user
         );
 
 
@@ -93,20 +93,20 @@ public class TicketService {
     /**
      * Retrieves a user's submitted tickets, most recent first.
      *
-     * @param userProfile the profile to look up tickets for
+     * @param user the user to look up tickets for
      * @return the user's tickets ordered by creation date, descending
      */
     public List<Ticket> getTicketsForUser(
-        UserProfile userProfile
+        User user
 ) {
 
     return ticketRepository
-            .findByUserProfileOrderByCreatedAtDesc(userProfile);
+            .findByUserOrderByCreatedAtDesc(user);
 
 }
 private void validateTicketData(
         String message,
-        UserProfile userProfile,
+        User user,
         TicketRoutingResult result
 ) {
 
@@ -120,7 +120,7 @@ private void validateTicketData(
     }
 
 
-    if(userProfile == null) {
+    if(user == null) {
 
         throw new InvalidTicketException(
                 "User information is missing"

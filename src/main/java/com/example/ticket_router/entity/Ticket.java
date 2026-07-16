@@ -30,8 +30,8 @@ public class Ticket {
     private Instant createdAt = Instant.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_profile_id", nullable = false)
-    private UserProfile userProfile;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public Ticket() {
     }
@@ -64,8 +64,8 @@ public class Ticket {
         return createdAt;
     }
 
-    public UserProfile getUserProfile() {
-        return userProfile;
+    public User getUser() {
+        return user;
     }
 
     public void setMessage(String message) {
@@ -88,7 +88,7 @@ public class Ticket {
         this.reasoning = reasoning;
     }
 
-    public void setUserProfile(UserProfile userProfile) {
-        this.userProfile = userProfile;
+    public void setUser(User user) {
+        this.user = user;
     }
 }
