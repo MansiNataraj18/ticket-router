@@ -37,3 +37,5 @@ build/
 
 logs/
 *.log
+logs/
+LOG_FILE_IS_UNDEFINED
