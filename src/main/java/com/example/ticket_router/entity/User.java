@@ -23,9 +23,9 @@ public class User {
     private String fullName;
 
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_type_id", nullable = false)
+    private UserType userType;
 
 
     @Column(nullable = false)
@@ -40,12 +40,12 @@ public class User {
             String username,
             String password,
             String fullName,
-            Role role
+            UserType userType
     ) {
         this.username = username;
         this.password = password;
         this.fullName = fullName;
-        this.role = role;
+        this.userType = userType;
     }
 
 
@@ -69,8 +69,8 @@ public class User {
     }
 
 
-    public Role getRole() {
-        return role;
+    public UserType getUserType() {
+        return userType;
     }
 
 
@@ -84,8 +84,8 @@ public class User {
     }
 
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setUserType(UserType userType) {
+        this.userType = userType;
     }
 
 

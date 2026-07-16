@@ -12,7 +12,7 @@
 
 <body>
 
-<div th:replace="~{fragments/navbar :: navbar(activePage='my-tickets', userName=${userName}, isAdmin=${isAdmin})}"></div>
+<div th:replace="~{fragments/navbar :: navbar(activePage='my-tickets', userName=${userName}, isAdmin=${isAdmin}, isDepartmentStaff=${isDepartmentStaff})}"></div>
 
 <div class="container">
 
@@ -48,6 +48,12 @@
         <p>
             <strong>Assigned Team:</strong>
             <span th:text="${ticket.assignedTeam}">Team</span>
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            <span th:text="${ticket.status}"
+                  th:classappend="'status-' + ${#strings.arrayJoin(#strings.toLowerCase(ticket.status).split('_'), '-')}">status</span>
         </p>
 
         <div class="reasoning">

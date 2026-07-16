@@ -2,7 +2,9 @@ package com.example.ticket_router.controller;
 
 import com.example.ticket_router.dto.Priority;
 import com.example.ticket_router.entity.Ticket;
+import com.example.ticket_router.exception.InvalidTicketException;
 import com.example.ticket_router.repository.TicketRepository;
+import com.example.ticket_router.service.TicketService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -20,29 +21,37 @@ import java.util.List;
 
 /**
  * Serves the admin dashboard, which lists every ticket submitted by every
- * user.
+ * user, and lets an admin delete LOW priority tickets.
  * <p>
  * Access is additionally restricted at the security layer (see
  * {@link com.example.ticket_router.config.SecurityConfig}, which requires
- * {@code ROLE_ADMIN} for {@code /admin}); the in-method check here is a
- * defense-in-depth guard and provides the log message on unauthorized access.
+ * the {@code VIEW_ALL_TICKETS} permission for {@code /admin}); the in-method
+ * check here is a defense-in-depth guard and provides the log message on
+ * unauthorized access.
  */
 @Controller
 public class AdminController {
 
     private static final Logger log = LoggerFactory.getLogger(AdminController.class);
 
+    private static final String VIEW_ALL_TICKETS = "VIEW_ALL_TICKETS";
+
     private final TicketRepository ticketRepository;
+
+    private final TicketService ticketService;
 
 
     /**
      * @param ticketRepository repository used to load every submitted ticket
+     * @param ticketService    applies the LOW-priority-only delete rule
      */
     public AdminController(
-            TicketRepository ticketRepository
+            TicketRepository ticketRepository,
+            TicketService ticketService
     ) {
 
         this.ticketRepository = ticketRepository;
+        this.ticketService = ticketService;
 
     }
 
@@ -58,8 +67,8 @@ public class AdminController {
      *                        (HIGH &rarr; LOW, ties broken by newest first), anything else
      *                        (or absent) orders by newest first
      * @param model           the Spring MVC model to populate for the view
-     * @return {@code "admin"} if the caller has {@code ROLE_ADMIN},
-     *         otherwise a redirect to {@code /}
+     * @return {@code "admin"} if the caller has the {@code VIEW_ALL_TICKETS}
+     *         permission, otherwise a redirect to {@code /}
      */
     @GetMapping("/admin")
     public String adminDashboard(
@@ -69,17 +78,10 @@ public class AdminController {
             Model model
     ) {
 
-        boolean isAdmin =
-                authentication != null &&
-                authentication.getAuthorities().stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .anyMatch(authority -> authority.equals("ROLE_ADMIN"));
-
-
-        if (!isAdmin) {
+        if (!hasViewAllTicketsPermission(authentication)) {
 
             log.warn(
-                    "Non-admin user '{}' attempted to access /admin",
+                    "User '{}' without VIEW_ALL_TICKETS attempted to access /admin",
                     authentication != null ? authentication.getName() : "anonymous"
             );
 
@@ -92,6 +94,7 @@ public class AdminController {
 
         model.addAttribute("userName", authentication.getName());
         model.addAttribute("isAdmin", true);
+        model.addAttribute("isDepartmentStaff", false);
 
 
         Priority priorityFilter = parsePriority(priorityParam);
@@ -128,6 +131,48 @@ public class AdminController {
 
         return "admin";
 
+    }
+
+
+    /**
+     * Deletes a ticket, but only if it is {@link Priority#LOW} priority.
+     *
+     * @param id             the ticket to delete
+     * @param authentication the current request's authentication
+     * @return a redirect back to {@code /admin}
+     * @throws InvalidTicketException if the ticket is not LOW priority
+     */
+    @PostMapping("/admin/tickets/{id}/delete")
+    public String deleteLowPriorityTicket(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+
+        if (!hasViewAllTicketsPermission(authentication)) {
+
+            log.warn(
+                    "User '{}' without VIEW_ALL_TICKETS attempted to delete ticket {}",
+                    authentication != null ? authentication.getName() : "anonymous",
+                    id
+            );
+
+            return "redirect:/";
+        }
+
+        ticketService.deleteLowPriorityTicket(id);
+
+        log.info("Admin '{}' deleted LOW priority ticket {}", authentication.getName(), id);
+
+        return "redirect:/admin";
+    }
+
+
+    private boolean hasViewAllTicketsPermission(Authentication authentication) {
+
+        return authentication != null &&
+                authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .anyMatch(authority -> authority.equals(VIEW_ALL_TICKETS));
     }
 
     /**

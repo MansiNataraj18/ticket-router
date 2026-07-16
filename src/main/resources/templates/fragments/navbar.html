@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<header th:fragment="navbar(activePage, userName, isAdmin)" class="navbar">
+<header th:fragment="navbar(activePage, userName, isAdmin, isDepartmentStaff)" class="navbar">
 
     <div class="navbar-inner">
 
@@ -10,11 +10,15 @@
 
         <nav class="nav-links">
 
-            <a href="/" th:classappend="${activePage == 'submit'} ? 'active'">Submit Ticket</a>
+            <a href="/" th:if="${!isAdmin and !isDepartmentStaff}" th:classappend="${activePage == 'submit'} ? 'active'">Submit Ticket</a>
 
-            <a href="/my-tickets" th:classappend="${activePage == 'my-tickets'} ? 'active'">My Tickets</a>
+            <a href="/my-tickets" th:if="${!isAdmin and !isDepartmentStaff}" th:classappend="${activePage == 'my-tickets'} ? 'active'">My Tickets</a>
+
+            <a href="/department" th:if="${isDepartmentStaff}" th:classappend="${activePage == 'department'} ? 'active'">Department</a>
 
             <a href="/admin" th:if="${isAdmin}" th:classappend="${activePage == 'admin'} ? 'active'">Admin</a>
+
+            <a href="/admin/users" th:if="${isAdmin}" th:classappend="${activePage == 'admin-users'} ? 'active'">Manage Users</a>
 
         </nav>
 

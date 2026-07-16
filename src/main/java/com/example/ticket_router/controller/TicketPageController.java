@@ -77,10 +77,15 @@ public class TicketPageController {
 
         boolean isAdmin = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(authority -> authority.equals("ROLE_ADMIN"));
+                .anyMatch(authority -> authority.equals("VIEW_ALL_TICKETS"));
+
+        boolean isDepartmentStaff = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(authority -> authority.equals("VIEW_DEPARTMENT_TICKETS"));
 
         model.addAttribute("userName", authentication.getName());
         model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("isDepartmentStaff", isDepartmentStaff);
 
         User user =
                 userRepository.findByUsername(authentication.getName())

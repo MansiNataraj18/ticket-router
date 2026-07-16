@@ -249,7 +249,7 @@ a {
 
 /* ---------- Forms ---------- */
 
-textarea, input[type="text"], input[type="password"] {
+textarea, input[type="text"], input[type="password"], select {
 
     width: 100%;
 
@@ -329,6 +329,40 @@ button:hover, .btn:hover {
 button:active, .btn:active {
 
     transform: translateY(1px);
+
+}
+
+
+.btn-danger {
+
+    display: inline-block;
+
+    padding: 12px 22px;
+
+    border: none;
+
+    border-radius: var(--radius-sm);
+
+    background: var(--color-danger-soft);
+
+    color: var(--color-danger);
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background .15s, color .15s;
+
+}
+
+
+.btn-danger:hover {
+
+    background: var(--color-danger);
+
+    color: white;
 
 }
 
@@ -506,6 +540,95 @@ button:active, .btn:active {
 
     font-size: 13px;
 
+}
+
+
+/* ---------- Ticket status badges ---------- */
+
+.status-pending, .status-accepted, .status-rejected,
+.status-in-progress, .status-completed {
+
+    display: inline-block;
+
+    padding: 2px 10px;
+
+    border-radius: 999px;
+
+    font-weight: 700;
+
+    font-size: 13px;
+
+}
+
+
+.status-pending {
+    background: var(--color-bg);
+    color: var(--color-text-muted);
+}
+
+
+.status-accepted {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+}
+
+
+.status-rejected {
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+}
+
+
+.status-in-progress {
+    background: var(--color-warning-soft);
+    color: var(--color-warning);
+}
+
+
+.status-completed {
+    background: var(--color-success-soft);
+    color: var(--color-success);
+}
+
+
+/* ---------- Ticket action bar (department dashboard) ---------- */
+
+.ticket-actions {
+
+    margin-top: 16px;
+
+    display: flex;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+}
+
+
+.status-form {
+
+    display: flex;
+
+    gap: 8px;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+}
+
+
+.status-form select {
+    width: auto;
+}
+
+
+.status-form button, .ticket-actions .btn-danger {
+    padding: 10px 18px;
+    font-size: 14px;
 }
 
 

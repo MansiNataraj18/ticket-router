@@ -1,8 +1,9 @@
 package com.example.ticket_router.controller;
 
-import com.example.ticket_router.entity.Role;
 import com.example.ticket_router.entity.User;
+import com.example.ticket_router.entity.UserType;
 import com.example.ticket_router.repository.UserRepository;
+import com.example.ticket_router.repository.UserTypeRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +20,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * Handles self-service account registration.
  * <p>
- * New accounts are always created with {@link Role#USER}; there is
- * intentionally no way for a caller to self-assign {@code ADMIN} or
- * {@code AGENT} through this endpoint.
+ * New accounts are always created with the {@code CUSTOMER} user type; there
+ * is intentionally no way for a caller to self-assign {@code ADMIN} or any
+ * department staff type through this endpoint. Staff/department accounts can
+ * only be created by an admin, via {@link AdminUserController}.
  */
 @Controller
 public class SignupController {
@@ -30,18 +32,23 @@ public class SignupController {
 
     private final UserRepository userRepository;
 
+    private final UserTypeRepository userTypeRepository;
+
     private final PasswordEncoder passwordEncoder;
 
 
     /**
-     * @param userRepository   used to check for existing usernames and persist new users
-     * @param passwordEncoder  used to hash the submitted password before storage
+     * @param userRepository     used to check for existing usernames and persist new users
+     * @param userTypeRepository used to look up the {@code CUSTOMER} user type
+     * @param passwordEncoder    used to hash the submitted password before storage
      */
     public SignupController(
             UserRepository userRepository,
+            UserTypeRepository userTypeRepository,
             PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
+        this.userTypeRepository = userTypeRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -56,7 +63,7 @@ public class SignupController {
 
 
     /**
-     * Validates and creates a new {@code ROLE_USER} account.
+     * Validates and creates a new {@code CUSTOMER} account.
      *
      * @param username the desired, unique username
      * @param password the plaintext password, hashed with {@link PasswordEncoder} before storage
@@ -91,11 +98,16 @@ public class SignupController {
 
         try {
 
+            UserType customerType = userTypeRepository.findByName("CUSTOMER")
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Expected user_type 'CUSTOMER' to exist - check migration V4"
+                    ));
+
             User user = new User(
                     username.trim(),
                     passwordEncoder.encode(password),
                     fullName.trim(),
-                    Role.USER
+                    customerType
             );
 
             userRepository.save(user);

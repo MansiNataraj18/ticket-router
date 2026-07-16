@@ -2,16 +2,21 @@ package com.example.ticket_router.service;
 
 import com.example.ticket_router.entity.Ticket;
 import com.example.ticket_router.entity.User;
+import com.example.ticket_router.dto.Priority;
 import com.example.ticket_router.dto.TicketRoutingResult;
+import com.example.ticket_router.dto.TicketStatus;
 import com.example.ticket_router.repository.TicketRepository;
 import com.example.ticket_router.exception.InvalidTicketException;
+import com.example.ticket_router.exception.TicketNotFoundException;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 /**
- * Persists submitted tickets and retrieves a given user's ticket history.
+ * Persists submitted tickets, retrieves a given user's or department's
+ * tickets, and applies the department/admin ticket workflow (status changes
+ * and the conditional delete rules for each side).
  */
 @Service
 public class TicketService {
@@ -104,6 +109,93 @@ public class TicketService {
             .findByUserOrderByCreatedAtDesc(user);
 
 }
+
+    /**
+     * Retrieves every ticket assigned to a department, most recent first,
+     * optionally narrowed down to a single priority level.
+     *
+     * @param assignedTeam   the exact team name (e.g. "Engineering Department")
+     * @param priorityFilter the priority to restrict results to, or {@code null} for all priorities
+     * @return that department's tickets (optionally filtered by priority), most recently created first
+     */
+    public List<Ticket> getTicketsForDepartment(String assignedTeam, Priority priorityFilter) {
+
+        return priorityFilter != null
+                ? ticketRepository.findByAssignedTeamAndPriorityOrderByCreatedAtDesc(assignedTeam, priorityFilter)
+                : ticketRepository.findByAssignedTeamOrderByCreatedAtDesc(assignedTeam);
+
+    }
+
+    /**
+     * Updates a ticket's workflow status (accepted/rejected/in progress/completed).
+     *
+     * @param ticketId  the ticket to update
+     * @param newStatus the status to set
+     * @return the updated ticket
+     * @throws TicketNotFoundException if no ticket exists with the given id
+     */
+    public Ticket updateStatus(Long ticketId, TicketStatus newStatus) {
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+
+        ticket.setStatus(newStatus);
+
+        return ticketRepository.save(ticket);
+
+    }
+
+    /**
+     * Deletes a ticket, but only if the department has already marked it
+     * {@link TicketStatus#REJECTED} — this is the one deletion a department
+     * is allowed to perform.
+     *
+     * @param ticketId the ticket to delete
+     * @throws TicketNotFoundException if no ticket exists with the given id
+     * @throws InvalidTicketException  if the ticket is not currently REJECTED
+     */
+    public void deleteRejectedTicket(Long ticketId) {
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+
+        if (ticket.getStatus() != TicketStatus.REJECTED) {
+
+            throw new InvalidTicketException(
+                    "Only tickets marked REJECTED can be deleted from the department view"
+            );
+
+        }
+
+        ticketRepository.delete(ticket);
+
+    }
+
+    /**
+     * Deletes a ticket, but only if it is {@link Priority#LOW} priority —
+     * this is the one deletion an admin is allowed to perform.
+     *
+     * @param ticketId the ticket to delete
+     * @throws TicketNotFoundException if no ticket exists with the given id
+     * @throws InvalidTicketException  if the ticket is not LOW priority
+     */
+    public void deleteLowPriorityTicket(Long ticketId) {
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+
+        if (ticket.getPriority() != Priority.LOW) {
+
+            throw new InvalidTicketException(
+                    "Only LOW priority tickets can be deleted from the admin dashboard"
+            );
+
+        }
+
+        ticketRepository.delete(ticket);
+
+    }
+
 private void validateTicketData(
         String message,
         User user,

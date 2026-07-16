@@ -1,6 +1,7 @@
 package com.example.ticket_router.entity;
 
 import com.example.ticket_router.dto.Priority;
+import com.example.ticket_router.dto.TicketStatus;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -25,6 +26,10 @@ public class Ticket {
 
     @Column(length = 1000)
     private String reasoning;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private TicketStatus status = TicketStatus.PENDING;
 
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
@@ -66,6 +71,14 @@ public class Ticket {
 
     public User getUser() {
         return user;
+    }
+
+    public TicketStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TicketStatus status) {
+        this.status = status;
     }
 
     public void setMessage(String message) {

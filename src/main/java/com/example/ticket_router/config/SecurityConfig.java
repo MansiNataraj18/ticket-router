@@ -42,8 +42,14 @@ public class SecurityConfig {
                     )
                     .permitAll()
 
-                    .requestMatchers("/admin")
-                    .hasRole("ADMIN")
+                    .requestMatchers("/admin/users/**")
+                    .hasAuthority("MANAGE_USERS")
+
+                    .requestMatchers("/admin/**", "/admin")
+                    .hasAuthority("VIEW_ALL_TICKETS")
+
+                    .requestMatchers("/department/**")
+                    .hasAuthority("VIEW_DEPARTMENT_TICKETS")
 
                     .anyRequest()
                     .authenticated()
@@ -70,16 +76,24 @@ public class SecurityConfig {
 
         return (request, response, authentication) -> {
 
-            boolean isAdmin = authentication.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            boolean canViewAllTickets = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("VIEW_ALL_TICKETS"));
+
+            boolean isDepartmentStaff = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("VIEW_DEPARTMENT_TICKETS"));
 
             log.info(
-                    "Login succeeded for user '{}' (roles: {})",
+                    "Login succeeded for user '{}' (authorities: {})",
                     authentication.getName(),
                     authentication.getAuthorities()
             );
 
-            response.sendRedirect(isAdmin ? "/admin" : "/");
+            String destination =
+                    canViewAllTickets ? "/admin"
+                    : isDepartmentStaff ? "/department"
+                    : "/";
+
+            response.sendRedirect(destination);
         };
     }
 

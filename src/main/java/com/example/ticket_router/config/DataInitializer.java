@@ -1,8 +1,9 @@
 package com.example.ticket_router.config;
 
-import com.example.ticket_router.entity.Role;
 import com.example.ticket_router.entity.User;
+import com.example.ticket_router.entity.UserType;
 import com.example.ticket_router.repository.UserRepository;
+import com.example.ticket_router.repository.UserTypeRepository;
 import com.example.ticket_router.service.EmbeddingService;
 import com.example.ticket_router.service.QdrantService;
 
@@ -27,6 +28,8 @@ public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
 
+    private final UserTypeRepository userTypeRepository;
+
     private final PasswordEncoder passwordEncoder;
 
 
@@ -34,11 +37,13 @@ public class DataInitializer implements CommandLineRunner {
             EmbeddingService embeddingService,
             QdrantService qdrantService,
             UserRepository userRepository,
+            UserTypeRepository userTypeRepository,
             PasswordEncoder passwordEncoder
     ) {
         this.embeddingService = embeddingService;
         this.qdrantService = qdrantService;
         this.userRepository = userRepository;
+        this.userTypeRepository = userTypeRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -85,12 +90,17 @@ public class DataInitializer implements CommandLineRunner {
         }
 
 
+        UserType admin = requireUserType("ADMIN");
+        UserType customer = requireUserType("CUSTOMER");
+        UserType supportStaff = requireUserType("SUPPORT_STAFF");
+
+
         userRepository.save(
                 new User(
                         "admin",
                         passwordEncoder.encode("admin123"),
                         "System Admin",
-                        Role.ADMIN
+                        admin
                 )
         );
 
@@ -100,7 +110,7 @@ public class DataInitializer implements CommandLineRunner {
                         "agent",
                         passwordEncoder.encode("agent123"),
                         "Support Agent",
-                        Role.AGENT
+                        supportStaff
                 )
         );
 
@@ -110,11 +120,20 @@ public class DataInitializer implements CommandLineRunner {
                         "user",
                         passwordEncoder.encode("user123"),
                         "Normal User",
-                        Role.USER
+                        customer
                 )
         );
 
 
         log.info("Default users created");
+    }
+
+
+    private UserType requireUserType(String name) {
+
+        return userTypeRepository.findByName(name)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Expected user_type '" + name + "' to exist - check migration V4"
+                ));
     }
 }

@@ -25,4 +25,23 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
      */
     List<Ticket> findByPriority(Priority priority);
 
+    /**
+     * Finds every ticket assigned to the given department/team, for a
+     * department staff member's own dashboard.
+     *
+     * @param assignedTeam the exact team name (e.g. "Engineering Department")
+     * @return that department's tickets, most recently created first
+     */
+    List<Ticket> findByAssignedTeamOrderByCreatedAtDesc(String assignedTeam);
+
+    /**
+     * Finds every ticket assigned to the given department/team at a given
+     * priority, for the department dashboard's priority filter.
+     *
+     * @param assignedTeam the exact team name (e.g. "Engineering Department")
+     * @param priority     the priority to filter by
+     * @return that department's tickets at that priority level, most recently created first
+     */
+    List<Ticket> findByAssignedTeamAndPriorityOrderByCreatedAtDesc(String assignedTeam, Priority priority);
+
 }
