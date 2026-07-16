@@ -39,7 +39,7 @@ public class TicketController {
     public TicketRoutingResult route(
             @Valid @RequestBody TicketRequest request,
             HttpSession session
-    ) throws Exception {
+    )  {
 
 
         TicketRoutingResult result =

@@ -2,6 +2,8 @@ package com.example.ticket_router.service;
 
 import com.example.ticket_router.client.TicketRoutingLlmClient;
 import com.example.ticket_router.dto.TicketRoutingResult;
+import com.example.ticket_router.exception.InvalidTicketException;
+import com.example.ticket_router.exception.RoutingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
@@ -29,45 +31,97 @@ public class TicketRoutingService {
     }
 
 
-    public TicketRoutingResult route(String message) throws Exception {
+    public TicketRoutingResult route(String message) {
 
 
-        // 1. Create embedding for incoming ticket
-        List<Float> vector =
-                embeddingService.generate(message);
+        // 1. Validate input
+        validateTicket(message);
 
 
-        // 2. Search similar historical tickets
-        String similarTickets =
-                qdrantService.findSimilarTickets(vector);
+        try {
+
+            // 2. Generate embedding
+            List<Float> vector =
+                    embeddingService.generate(message);
 
 
-        // 3. Add retrieved context to prompt
-        String enrichedMessage =
-                """
-                Similar historical tickets:
 
-                %s
+            // 3. Search similar tickets
+            String similarTickets =
+                    qdrantService.findSimilarTickets(vector);
 
 
-                New ticket:
 
-                %s
-                """.formatted(
-                        similarTickets,
-                        message
-                );
+            // 4. Create enriched prompt
+            String enrichedMessage =
+                    """
+                    Similar historical tickets:
 
-
-        // 4. Send enriched ticket to OpenAI
-        String rawJson =
-                llmClient.routeTicket(enrichedMessage);
+                    %s
 
 
-        // 5. Convert JSON response to Java object
-        return objectMapper.readValue(
-                rawJson,
-                TicketRoutingResult.class
-        );
+                    New ticket:
+
+                    %s
+                    """.formatted(
+                            similarTickets,
+                            message
+                    );
+
+
+
+            // 5. Call LLM
+            String rawJson =
+                    llmClient.routeTicket(enrichedMessage);
+
+
+
+            // 6. Parse response
+            return objectMapper.readValue(
+                    rawJson,
+                    TicketRoutingResult.class
+            );
+
+
+        } catch (Exception e) {
+
+
+            throw new RoutingException(
+                    "Failed to process ticket routing",
+                    e
+            );
+
+        }
+    }
+
+
+
+    private void validateTicket(String message) {
+
+
+        if(message == null ||
+                message.isBlank()) {
+
+            throw new InvalidTicketException(
+                    "Ticket message cannot be empty"
+            );
+        }
+
+
+        if(message.length() < 10) {
+
+            throw new InvalidTicketException(
+                    "Ticket message must contain at least 10 characters"
+            );
+        }
+
+
+        if(message.length() > 5000) {
+
+            throw new InvalidTicketException(
+                    "Ticket message cannot exceed 5000 characters"
+            );
+        }
+
     }
 }

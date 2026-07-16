@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.List;
 
+import com.example.ticket_router.exception.RoutingException;
+
 //registers this class as a Spring Component, allowing it to create beans
 @Component
 public class OpenAiTicketRoutingClient implements TicketRoutingLlmClient {
@@ -31,57 +33,52 @@ public class OpenAiTicketRoutingClient implements TicketRoutingLlmClient {
      * @param ticketMessage the message of the ticket to route
      * @return the routing decision for the ticket
      */
-    @Override
-    public String routeTicket(String ticketMessage) {
-        //constructs the request body for the OpenAI API call, including the model, system
+   @Override
+public String routeTicket(String ticketMessage) {
 
-        //creates json sent to OpenAI 
+    try {
+
         Map<String, Object> request = Map.of(
-                    "model", "gpt-4o-mini",
+                "model", "gpt-4o-mini",
+                "messages", List.of(
+                        Map.of(
+                                "role", "system",
+                                "content", TicketRoutingPrompt.SYSTEM_PROMPT
+                        ),
+                        Map.of(
+                                "role", "user",
+                                "content", ticketMessage
+                        )
+                ),
+                "response_format",
+                Map.of(
+                        "type", "json_object"
+                )
+        );
 
-                    "messages", List.of(
-                            Map.of(
-                                    "role", "system",
-                                    "content", TicketRoutingPrompt.SYSTEM_PROMPT
-                            ),
-                            Map.of(
-                                    "role", "user",
-                                    "content", ticketMessage
-                            )
-                    ),
+        String response = webClient.post()
+                .uri("/chat/completions")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
 
-                    "response_format",
-                    //tells OpenAi tp return the response in JSON format only
-                    Map.of(
-                            "type", "json_object"
-                    )
-            );
+        JsonNode json = objectMapper.readTree(response);
 
-            //Used to create a POST request to the OpenAI API's chat completions endpoint, sending the request body and retrieving the response as a String. The block() method is used to block the execution until the response is received.
-            String response = webClient.post()
-            //specifies the endpoint for the OpenAI API's chat completions feature
-                    .uri("/chat/completions")
-                    //converts java map into json automatically
-                    .bodyValue(request)
-                    //sends the request
-                    .retrieve()
-                    //response body should be converted to a string
-                    .bodyToMono(String.class)
-                    //makes request synchronous 
-                    .block();
+        return json
+                .get("choices")
+                .get(0)
+                .get("message")
+                .get("content")
+                .asText();
 
+    } catch (Exception e) {
 
-            try {
-                JsonNode json = objectMapper.readTree(response);
+        throw new RoutingException(
+                "Failed to get routing decision from OpenAI",
+                e
+        );
 
-                return json
-                        .get("choices")
-                        .get(0)
-                        .get("message")
-                        .get("content")
-                        .asText();
-            } catch (Exception e) {
-                throw new RuntimeException("Error parsing OpenAI response", e);
-            }
-        }
+    }
+}
 }

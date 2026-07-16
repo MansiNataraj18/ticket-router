@@ -5,6 +5,8 @@ import com.example.ticket_router.repository.UserProfileRepository;
 
 import org.springframework.stereotype.Service;
 
+import com.example.ticket_router.exception.InvalidTicketException;
+
 @Service
 public class UserProfileService {
 
@@ -16,11 +18,21 @@ public class UserProfileService {
 
     public UserProfile getOrCreate(String name) {
 
-        return userProfileRepository.findByName(name)
-                .orElseGet(() ->
-                        userProfileRepository.save(
-                                new UserProfile(name)
-                        )
-                );
+
+    if(name == null || name.isBlank()) {
+
+        throw new InvalidTicketException(
+                "Username cannot be empty"
+        );
+
     }
+
+
+    return userProfileRepository.findByName(name)
+            .orElseGet(() ->
+                    userProfileRepository.save(
+                            new UserProfile(name)
+                    )
+            );
+}
 }
