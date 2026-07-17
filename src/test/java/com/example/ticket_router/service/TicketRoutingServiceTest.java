@@ -89,9 +89,21 @@ class TicketRoutingServiceTest {
     }
 
     @Test
-    void route_throwsInvalidTicketException_whenMessageIsTooShort() {
+    void route_routesSuccessfully_whenMessageIsVeryShortOrVague() {
 
-        assertThrows(InvalidTicketException.class, () -> ticketRoutingService.route("too short"));
+        when(embeddingService.generate("broken")).thenReturn(List.of(0.1f));
+        when(qdrantService.findSimilarTickets(anyList())).thenReturn("No similar historical tickets found.");
+        when(llmClient.routeTicket(anyString())).thenReturn(
+                "{\"category\":\"General Inquiry\",\"priority\":\"MEDIUM\","
+                        + "\"assignedTeam\":\"Customer Service Team\","
+                        + "\"reasoning\":\"Too vague to classify further; ask for more detail.\"}"
+        );
+
+        TicketRoutingResult result = ticketRoutingService.route("broken");
+
+        assertEquals("General Inquiry", result.category());
+        assertEquals(Priority.MEDIUM, result.priority());
+        assertEquals("Customer Service Team", result.assignedTeam());
     }
 
     @Test

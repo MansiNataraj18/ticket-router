@@ -49,6 +49,10 @@ public class OpenAiTicketRoutingClient implements TicketRoutingLlmClient {
      * the {@code resilience4j.retry.instances.openai} settings in
      * {@code application.properties} (currently 3 attempts, 1s apart)
      * before the exception is allowed to propagate.
+     * <p>
+     * Sends {@code temperature: 0} so that the same input consistently
+     * produces the same (or near-identical) classification, rather than
+     * varying category/priority/reasoning between runs.
      *
      * @param ticketMessage the (optionally RAG-enriched) message of the ticket to route
      * @return the raw JSON routing decision returned by the model
@@ -76,7 +80,8 @@ public String routeTicket(String ticketMessage) {
                 "response_format",
                 Map.of(
                         "type", "json_object"
-                )
+                ),
+                "temperature", 0
         );
 
         String response = webClient.post()

@@ -60,7 +60,11 @@ public class TicketRoutingService {
      * @param message the raw ticket message text
      * @return the parsed category, priority, assigned team, and reasoning
      * @throws InvalidTicketException if {@code message} is null, blank, or
-     *         outside the 10-5000 character range
+     *         over 5000 characters. Short or vague messages (e.g. "broken")
+     *         are intentionally allowed through to the AI rather than
+     *         rejected here — {@link com.example.ticket_router.prompt.TicketRoutingPrompt}
+     *         instructs the model to classify them gracefully instead of
+     *         refusing to respond.
      * @throws RoutingException if embedding generation, the Qdrant search, the
      *         LLM call, or parsing the LLM's response fails
      */
@@ -144,14 +148,6 @@ public class TicketRoutingService {
 
             throw new InvalidTicketException(
                     "Ticket message cannot be empty"
-            );
-        }
-
-
-        if(message.length() < 10) {
-
-            throw new InvalidTicketException(
-                    "Ticket message must contain at least 10 characters"
             );
         }
 

@@ -102,6 +102,28 @@ public final class TicketRoutingPrompt {
             if relevant.
 
 
+            HANDLING VAGUE OR VERY SHORT MESSAGES:
+
+            Never refuse to respond, and never ask a clarifying question
+            outside the JSON structure — you must always return the JSON
+            format below, even for a message as short as a single word (for
+            example: "broken", "help", "?").
+
+            If the message is too short or vague to confidently identify a
+            specific issue:
+            - Choose "General Inquiry" / Customer Service Team, unless the
+              wording clearly implies a specific category (e.g. "broken" with
+              no other context is too vague to imply Technical Issue on its
+              own; "invoice broken" is specific enough for Billing).
+            - Default to MEDIUM priority, unless the vague wording still
+              implies a HIGH condition (e.g. "nothing works at all").
+            - In "reasoning", explicitly say the message lacked enough detail
+              to classify with confidence, and name the specific information
+              that would help route it accurately (for example: "The message
+              is too brief to determine the issue; ask the customer which
+              feature or page is affected.").
+
+
             RESPONSE FORMAT:
 
             Respond ONLY with valid JSON.
@@ -176,6 +198,20 @@ public final class TicketRoutingPrompt {
               "assignedTeam": "Engineering Department",
               "priority": "HIGH",
               "reasoning": "Although only one user is affected, the issue has persisted unresolved for 5 days, which escalates it to high priority."
+            }
+
+
+            Example 5:
+
+            Customer message:
+            "broken"
+
+            Response:
+            {
+              "category": "General Inquiry",
+              "assignedTeam": "Customer Service Team",
+              "priority": "MEDIUM",
+              "reasoning": "The message is too brief to identify what is broken; ask the customer which feature or page is affected before routing further."
             }
             """;
 
