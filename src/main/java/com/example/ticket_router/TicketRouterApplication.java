@@ -7,6 +7,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import com.example.ticket_router.config.OpenAiProperties;
 import com.example.ticket_router.config.QdrantProperties;
 
+/**
+ * Entry point for the application
+ * <p>Bootstraps application and enables configuration properties for OpenAi and Qdrant integrations</p>
+ */
 
 @SpringBootApplication
 @EnableConfigurationProperties({
