@@ -1,6 +1,5 @@
 package com.example.ticket_router.client;
 
-
 import com.example.ticket_router.dto.EmbeddingResponse;
 
 import io.github.resilience4j.retry.annotation.Retry;
@@ -10,7 +9,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Client responsible for generating text embeddings via the OpenAI Embeddings API.
@@ -23,9 +21,7 @@ import java.util.Map;
 @Component
 public class OpenAiEmbeddingClient {
 
-
     private final WebClient webClient;
-
 
     /**
      * @param openAiWebClient a {@link WebClient} pre-configured with the OpenAI
@@ -34,7 +30,6 @@ public class OpenAiEmbeddingClient {
     public OpenAiEmbeddingClient(WebClient openAiWebClient) {
         this.webClient = openAiWebClient;
     }
-
 
     /**
      * Requests an embedding vector for the given text from OpenAI's
@@ -54,13 +49,10 @@ public class OpenAiEmbeddingClient {
      */
     @Retry(name = "openai")
     public List<Float> createEmbedding(String text) {
-
-
         Map<String, Object> request = Map.of(
                 "model", "text-embedding-3-small",
                 "input", text
         );
-
 
         EmbeddingResponse response = webClient.post()
                 .uri("/embeddings")
@@ -69,14 +61,11 @@ public class OpenAiEmbeddingClient {
                 .bodyToMono(EmbeddingResponse.class)
                 .block();
 
-
         return response.getData()
                 .get(0)
                 .getEmbedding()
                 .stream()
                 .map(Double::floatValue)
                 .toList();
-
     }
-
 }

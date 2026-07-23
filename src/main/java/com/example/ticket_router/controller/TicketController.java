@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-
 /**
  * REST endpoint that classifies (routes) a support ticket using the
  * Retrieval-Augmented Generation pipeline in {@link TicketRoutingService},
@@ -29,12 +28,8 @@ public class TicketController {
     private static final Logger log = LoggerFactory.getLogger(TicketController.class);
 
     private final TicketRoutingService service;
-
     private final TicketService ticketService;
-
     private final UserRepository userRepository;
-
-
 
     /**
      * @param service        performs the embed &rarr; search &rarr; LLM routing pipeline
@@ -47,14 +42,10 @@ public class TicketController {
             TicketService ticketService,
             UserRepository userRepository
     ) {
-
         this.service = service;
         this.ticketService = ticketService;
         this.userRepository = userRepository;
-
     }
-
-
 
     /**
      * Classifies the submitted ticket message and, if the caller is
@@ -76,9 +67,7 @@ public class TicketController {
             @Valid @RequestBody TicketRequest request,
             Authentication authentication
     )  {
-
         String username = authentication != null ? authentication.getName() : "anonymous";
-
         log.info("User '{}' submitted a ticket for routing", username);
 
         TicketRoutingResult result =
@@ -94,9 +83,7 @@ public class TicketController {
                 result.assignedTeam()
         );
 
-
         if (authentication != null && authentication.isAuthenticated()) {
-
             User user =
                     userRepository.findByUsername(authentication.getName())
                             .orElseThrow(() -> new UserNotFoundException(authentication.getName()));
@@ -106,12 +93,8 @@ public class TicketController {
                     user,
                     result
             );
-
         }
 
-
         return result;
-
     }
-
 }

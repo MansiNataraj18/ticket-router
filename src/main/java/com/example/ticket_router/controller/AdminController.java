@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Comparator;
 import java.util.List;
 
-
 /**
  * Serves the admin dashboard, which lists every ticket submitted by every
  * user, and lets an admin delete LOW priority tickets.
@@ -33,13 +32,10 @@ import java.util.List;
 public class AdminController {
 
     private static final Logger log = LoggerFactory.getLogger(AdminController.class);
-
     private static final String VIEW_ALL_TICKETS = "VIEW_ALL_TICKETS";
 
     private final TicketRepository ticketRepository;
-
     private final TicketService ticketService;
-
 
     /**
      * @param ticketRepository repository used to load every submitted ticket
@@ -49,13 +45,9 @@ public class AdminController {
             TicketRepository ticketRepository,
             TicketService ticketService
     ) {
-
         this.ticketRepository = ticketRepository;
         this.ticketService = ticketService;
-
     }
-
-
 
     /**
      * Renders the admin dashboard listing all tickets, for admins only.
@@ -77,35 +69,26 @@ public class AdminController {
             @RequestParam(name = "sort", required = false) String sort,
             Model model
     ) {
-
         if (!hasViewAllTicketsPermission(authentication)) {
-
             log.warn(
                     "User '{}' without VIEW_ALL_TICKETS attempted to access /admin",
                     authentication != null ? authentication.getName() : "anonymous"
             );
-
             return "redirect:/";
-
         }
 
-
         log.info("Admin '{}' opened the admin dashboard", authentication.getName());
-
         model.addAttribute("userName", authentication.getName());
         model.addAttribute("isAdmin", true);
         model.addAttribute("isDepartmentStaff", false);
 
-
         Priority priorityFilter = parsePriority(priorityParam);
-
         List<Ticket> tickets =
                 priorityFilter != null
                         ? ticketRepository.findByPriority(priorityFilter)
                         : ticketRepository.findAll();
 
         boolean sortByPriority = "priority".equalsIgnoreCase(sort);
-
         Comparator<Ticket> comparator =
                 sortByPriority
                         ? Comparator.comparing((Ticket t) -> t.getPriority().ordinal())
@@ -114,7 +97,6 @@ public class AdminController {
                         : Comparator.comparing(Ticket::getCreatedAt, Comparator.reverseOrder());
 
         List<Ticket> sortedTickets = tickets.stream().sorted(comparator).toList();
-
         log.debug(
                 "Admin dashboard: {} ticket(s) shown (priority filter={}, sort={})",
                 sortedTickets.size(),
@@ -122,17 +104,12 @@ public class AdminController {
                 sortByPriority ? "priority" : "newest"
         );
 
-
         model.addAttribute("tickets", sortedTickets);
         model.addAttribute("selectedPriority", priorityFilter != null ? priorityFilter.name() : null);
         model.addAttribute("selectedSort", sortByPriority ? "priority" : null);
 
-
-
         return "admin";
-
     }
-
 
     /**
      * Deletes a ticket, but only if it is {@link Priority#LOW} priority.
@@ -147,28 +124,21 @@ public class AdminController {
             @PathVariable Long id,
             Authentication authentication
     ) {
-
         if (!hasViewAllTicketsPermission(authentication)) {
-
             log.warn(
                     "User '{}' without VIEW_ALL_TICKETS attempted to delete ticket {}",
                     authentication != null ? authentication.getName() : "anonymous",
                     id
             );
-
             return "redirect:/";
         }
 
         ticketService.deleteLowPriorityTicket(id);
-
         log.info("Admin '{}' deleted LOW priority ticket {}", authentication.getName(), id);
-
         return "redirect:/admin";
     }
 
-
     private boolean hasViewAllTicketsPermission(Authentication authentication) {
-
         return authentication != null &&
                 authentication.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
@@ -184,7 +154,6 @@ public class AdminController {
      * @return the matching {@link Priority}, or {@code null} if none was given or it was invalid
      */
     private Priority parsePriority(String priorityParam) {
-
         if (priorityParam == null || priorityParam.isBlank()) {
             return null;
         }
@@ -196,5 +165,4 @@ public class AdminController {
             return null;
         }
     }
-
 }

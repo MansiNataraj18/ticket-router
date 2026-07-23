@@ -6,6 +6,13 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+/**
+ * A support ticket submitted by a {@link User}, persisted in the
+ * {@code ticket} table. The {@code category}, {@code priority}, {@code
+ * assignedTeam}, and {@code reasoning} fields are populated by the AI
+ * routing pipeline, while {@code status} tracks the owning department's
+ * workflow progress on the ticket.
+ */
 @Entity
 @Table(name = "ticket")
 public class Ticket {

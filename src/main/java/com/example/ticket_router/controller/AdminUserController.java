@@ -16,7 +16,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-
 /**
  * Admin-only screen for creating role-specific (staff/department, or even
  * another admin) accounts.
@@ -36,7 +35,6 @@ public class AdminUserController {
     private final UserTypeRepository userTypeRepository;
     private final PasswordEncoder passwordEncoder;
 
-
     /**
      * @param userRepository     used to list existing users and persist new ones
      * @param userTypeRepository used to populate the user-type dropdown
@@ -51,7 +49,6 @@ public class AdminUserController {
         this.userTypeRepository = userTypeRepository;
         this.passwordEncoder = passwordEncoder;
     }
-
 
     /**
      * Renders the "create user" screen along with the current user list,
@@ -69,18 +66,14 @@ public class AdminUserController {
             @RequestParam(name = "type", required = false) String userTypeName,
             Model model
     ) {
-
         log.info(
                 "Admin '{}' opened the user management screen (type filter={})",
                 authentication.getName(),
                 userTypeName
         );
-
         populateCommonAttributes(authentication, model, userTypeName);
-
         return "admin-users";
     }
-
 
     /**
      * Creates a new user with an admin-selected user type.
@@ -103,12 +96,10 @@ public class AdminUserController {
             Authentication authentication,
             Model model
     ) {
-
         if (username == null || username.isBlank()
                 || password == null || password.isBlank()
                 || fullName == null || fullName.isBlank()
                 || userTypeName == null || userTypeName.isBlank()) {
-
             log.warn("Admin '{}' submitted an incomplete create-user form", authentication.getName());
             model.addAttribute("error", "All fields are required.");
             populateCommonAttributes(authentication, model, null);
@@ -116,7 +107,6 @@ public class AdminUserController {
         }
 
         if (userRepository.findByUsername(username.trim()).isPresent()) {
-
             log.warn("Admin '{}' attempted to create a duplicate username '{}'", authentication.getName(), username);
             model.addAttribute("error", "That username is already taken.");
             populateCommonAttributes(authentication, model, null);
@@ -124,7 +114,6 @@ public class AdminUserController {
         }
 
         try {
-
             UserType userType = userTypeRepository.findByName(userTypeName)
                     .orElseThrow(() -> new IllegalArgumentException("Unknown user type: " + userTypeName));
 
@@ -136,16 +125,13 @@ public class AdminUserController {
             );
 
             userRepository.save(user);
-
             log.info(
                     "Admin '{}' created new '{}' user '{}'",
                     authentication.getName(),
                     userTypeName,
                     username
             );
-
         } catch (IllegalArgumentException | DataIntegrityViolationException e) {
-
             log.warn("Failed to create user '{}': {}", username, e.getMessage());
             model.addAttribute("error", "Could not create that user: " + e.getMessage());
             populateCommonAttributes(authentication, model, null);
@@ -154,7 +140,6 @@ public class AdminUserController {
 
         return "redirect:/admin/users?created";
     }
-
 
     /**
      * Populates the model attributes shared by every render of the
@@ -167,7 +152,6 @@ public class AdminUserController {
      *                          by, or {@code null}/blank/unrecognized to show every user
      */
     private void populateCommonAttributes(Authentication authentication, Model model, String selectedTypeName) {
-
         boolean isAdmin = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(authority -> authority.equals("VIEW_ALL_TICKETS"));
@@ -178,15 +162,12 @@ public class AdminUserController {
         model.addAttribute("userTypes", userTypeRepository.findAll());
 
         boolean hasTypeFilter = selectedTypeName != null && !selectedTypeName.isBlank();
-
         model.addAttribute(
                 "users",
                 hasTypeFilter
                         ? userRepository.findByUserType_Name(selectedTypeName)
                         : userRepository.findAll()
         );
-
         model.addAttribute("selectedUserType", hasTypeFilter ? selectedTypeName : null);
     }
-
 }

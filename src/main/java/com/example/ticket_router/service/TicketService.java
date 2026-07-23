@@ -8,9 +8,7 @@ import com.example.ticket_router.dto.TicketStatus;
 import com.example.ticket_router.repository.TicketRepository;
 import com.example.ticket_router.exception.InvalidTicketException;
 import com.example.ticket_router.exception.TicketNotFoundException;
-
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,9 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TicketService {
 
-
     private final TicketRepository ticketRepository;
-
 
     /**
      * @param ticketRepository repository used to persist and query tickets
@@ -31,11 +27,8 @@ public class TicketService {
     public TicketService(
             TicketRepository ticketRepository
     ) {
-
         this.ticketRepository = ticketRepository;
-
     }
-
 
     /**
      * Saves a newly routed ticket against the given user.
@@ -52,47 +45,30 @@ public class TicketService {
         User user,
         TicketRoutingResult result
 ) {
-
-
     validateTicketData(
             message,
             user,
             result
     );
 
-
     Ticket ticket = new Ticket();
-
-
         ticket.setMessage(message);
-
         ticket.setCategory(
                 result.category()
         );
-
-
         ticket.setPriority(
                 result.priority()
         );
-
-
         ticket.setAssignedTeam(
                 result.assignedTeam()
         );
-
-
         ticket.setReasoning(
                 result.reasoning()
         );
-
-
         ticket.setUser(
                 user
         );
-
-
         return ticketRepository.save(ticket);
-
     }
 
     /**
@@ -104,10 +80,8 @@ public class TicketService {
     public List<Ticket> getTicketsForUser(
         User user
 ) {
-
     return ticketRepository
             .findByUserOrderByCreatedAtDesc(user);
-
 }
 
     /**
@@ -119,11 +93,9 @@ public class TicketService {
      * @return that department's tickets (optionally filtered by priority), most recently created first
      */
     public List<Ticket> getTicketsForDepartment(String assignedTeam, Priority priorityFilter) {
-
         return priorityFilter != null
                 ? ticketRepository.findByAssignedTeamAndPriorityOrderByCreatedAtDesc(assignedTeam, priorityFilter)
                 : ticketRepository.findByAssignedTeamOrderByCreatedAtDesc(assignedTeam);
-
     }
 
     /**
@@ -135,14 +107,10 @@ public class TicketService {
      * @throws TicketNotFoundException if no ticket exists with the given id
      */
     public Ticket updateStatus(Long ticketId, TicketStatus newStatus) {
-
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketNotFoundException(ticketId));
-
         ticket.setStatus(newStatus);
-
         return ticketRepository.save(ticket);
-
     }
 
     /**
@@ -155,20 +123,14 @@ public class TicketService {
      * @throws InvalidTicketException  if the ticket is not currently REJECTED
      */
     public void deleteRejectedTicket(Long ticketId) {
-
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketNotFoundException(ticketId));
-
         if (ticket.getStatus() != TicketStatus.REJECTED) {
-
             throw new InvalidTicketException(
                     "Only tickets marked REJECTED can be deleted from the department view"
             );
-
         }
-
         ticketRepository.delete(ticket);
-
     }
 
     /**
@@ -180,20 +142,14 @@ public class TicketService {
      * @throws InvalidTicketException  if the ticket is not LOW priority
      */
     public void deleteLowPriorityTicket(Long ticketId) {
-
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketNotFoundException(ticketId));
-
         if (ticket.getPriority() != Priority.LOW) {
-
             throw new InvalidTicketException(
                     "Only LOW priority tickets can be deleted from the admin dashboard"
             );
-
         }
-
         ticketRepository.delete(ticket);
-
     }
 
 private void validateTicketData(
@@ -201,46 +157,30 @@ private void validateTicketData(
         User user,
         TicketRoutingResult result
 ) {
-
-
     if(message == null || message.isBlank()) {
-
         throw new InvalidTicketException(
                 "Cannot save an empty ticket"
         );
-
     }
 
-
     if(user == null) {
-
         throw new InvalidTicketException(
                 "User information is missing"
         );
-
     }
 
-
     if(result == null) {
-
         throw new InvalidTicketException(
                 "Ticket routing result is missing"
         );
-
     }
-
 
     if(result.category() == null ||
        result.priority() == null ||
        result.assignedTeam() == null) {
-
-
         throw new InvalidTicketException(
                 "Incomplete routing result received"
         );
-
     }
-
 }
-
 }

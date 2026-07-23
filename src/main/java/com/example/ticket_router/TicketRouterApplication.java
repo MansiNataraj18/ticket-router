@@ -18,9 +18,7 @@ import com.example.ticket_router.config.QdrantProperties;
         QdrantProperties.class
 })
 public class TicketRouterApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(TicketRouterApplication.class, args);
     }
-
 }

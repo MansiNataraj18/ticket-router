@@ -1,85 +1,61 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-
     <title>Department Dashboard</title>
-
     <link rel="stylesheet" href="/css/style.css">
-
 </head>
 
-
 <body>
-
 <div th:replace="~{fragments/navbar :: navbar(activePage='department', userName=${userName}, isAdmin=${isAdmin}, isDepartmentStaff=${isDepartmentStaff})}"></div>
-
 <div class="container">
-
     <div class="page-header">
         <h1 th:text="${departmentName}">Department Dashboard</h1>
         <p>View and work through tickets assigned to your department.</p>
     </div>
 
     <div class="card filter-bar">
-
         <span class="filter-label">Priority:</span>
-
         <div class="filter-group">
-
             <a class="filter-pill"
                th:classappend="${selectedPriority == null} ? ' active'"
                th:href="@{/department}">All</a>
-
             <a class="filter-pill"
                th:classappend="${selectedPriority == 'HIGH'} ? ' active'"
                th:href="@{/department(priority='HIGH')}">High</a>
-
             <a class="filter-pill"
                th:classappend="${selectedPriority == 'MEDIUM'} ? ' active'"
                th:href="@{/department(priority='MEDIUM')}">Medium</a>
-
             <a class="filter-pill"
                th:classappend="${selectedPriority == 'LOW'} ? ' active'"
                th:href="@{/department(priority='LOW')}">Low</a>
-
         </div>
-
     </div>
 
     <div th:if="${#lists.isEmpty(tickets)}" class="card empty-state">
-
         <h3 th:if="${selectedPriority != null}" th:text="'No ' + ${selectedPriority} + ' priority tickets'">No tickets</h3>
         <h3 th:if="${selectedPriority == null}">No tickets available</h3>
         <p>Tickets assigned to your department will show up here.</p>
-
     </div>
-
 
     <div th:each="ticket : ${tickets}"
          class="ticket-card">
-
         <h3>
             User:
             <span th:text="${ticket.user.username}">username</span>
         </h3>
-
         <p>
             <strong>Message:</strong>
             <span th:text="${ticket.message}">message</span>
         </p>
-
         <p>
             <strong>Category:</strong>
             <span th:text="${ticket.category}">category</span>
         </p>
-
         <p>
             <strong>Priority:</strong>
             <span th:text="${ticket.priority}"
                   th:classappend="${#strings.toLowerCase(ticket.priority)}">priority</span>
         </p>
-
         <p>
             <strong>Status:</strong>
             <span th:text="${ticket.status}"
@@ -97,11 +73,8 @@
         </small>
 
         <div class="ticket-actions">
-
             <form th:action="@{/department/tickets/{id}/status(id=${ticket.id})}" method="post" class="status-form">
-
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
                 <select name="status">
                     <option value="PENDING" th:selected="${ticket.status.name() == 'PENDING'}">Pending</option>
                     <option value="ACCEPTED" th:selected="${ticket.status.name() == 'ACCEPTED'}">Accepted</option>
@@ -109,30 +82,18 @@
                     <option value="IN_PROGRESS" th:selected="${ticket.status.name() == 'IN_PROGRESS'}">In Progress</option>
                     <option value="COMPLETED" th:selected="${ticket.status.name() == 'COMPLETED'}">Completed</option>
                 </select>
-
                 <button type="submit" class="btn">Update Status</button>
-
             </form>
 
             <form th:if="${ticket.status.name() == 'REJECTED'}"
                   th:action="@{/department/tickets/{id}/delete(id=${ticket.id})}"
                   method="post"
                   style="display:inline;">
-
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
                 <button type="submit" class="btn-danger">Delete</button>
-
             </form>
-
         </div>
-
     </div>
-
-
 </div>
-
-
 </body>
-
 </html>

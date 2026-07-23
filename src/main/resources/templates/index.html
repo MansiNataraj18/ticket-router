@@ -1,94 +1,63 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <title>Smart Ticket Router</title>
-
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-
     <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
-
 <div th:replace="~{fragments/navbar :: navbar(activePage='submit', userName=${userName}, isAdmin=${isAdmin}, isDepartmentStaff=${isDepartmentStaff})}"></div>
-
 <div class="container">
-
     <div class="page-header">
         <h1>Submit a Ticket</h1>
         <p>Describe the issue and let AI classify it using similar past tickets.</p>
     </div>
 
     <section class="card">
-
         <h2>New Ticket</h2>
-
         <textarea
             id="message"
             placeholder="Describe the customer's issue..."></textarea>
-
         <button onclick="routeTicket()">
             Analyze Ticket
         </button>
-
     </section>
-
 
     <section
         id="result"
         class="card"
         style="display:none;">
-
-
         <h2>Routing Result</h2>
-
-
         <div class="grid">
-
             <div class="field">
                 <label>Category</label>
                 <span id="category"></span>
             </div>
-
             <div class="field">
                 <label>Priority</label>
                 <span id="priority"></span>
             </div>
-
             <div class="field">
                 <label>Assigned Team</label>
                 <span id="team"></span>
             </div>
-
         </div>
-
 
         <div class="reasoning">
-
             <h3 style="margin-top:0;">AI Reasoning</h3>
-
             <p id="reasoning" style="margin:0;"></p>
-
         </div>
-
-
     </section>
-
-
 </div>
 
-
 <script>
-
 async function routeTicket() {
-
     const message =
         document
             .getElementById("message")
             .value;
-
     if (!message.trim()) {
         alert("Please enter a ticket message");
         return;
@@ -96,67 +65,51 @@ async function routeTicket() {
 
     const result =
         document.getElementById("result");
-
     result.style.display = "block";
-
     document
         .getElementById("reasoning")
         .innerText =
         "Analyzing with AI...";
 
     try {
-
         const response =
             await fetch(
                 "/api/tickets/route",
                 {
                     method:"POST",
-
                     headers:{
                         "Content-Type":"application/json",
                         [document.querySelector('meta[name="_csrf_header"]').content]:
                             document.querySelector('meta[name="_csrf"]').content
                     },
-
                     body:JSON.stringify({
                         message:message
                     })
                 }
             );
-
         if (!response.ok) {
             throw new Error("Request failed: " + response.status);
         }
 
         const data =
             await response.json();
-
         document.getElementById("category").innerText = data.category;
         document.getElementById("priority").innerText = data.priority;
         document.getElementById("team").innerText = data.assignedTeam;
         document.getElementById("reasoning").innerText = data.reasoning;
-
         document
             .getElementById("priority")
             .className =
             data.priority.toLowerCase();
-
     }
-
     catch(error) {
-
         document
             .getElementById("reasoning")
             .innerText =
             "Error: " + error.message;
-
     }
-
 }
-
 </script>
 
-
 </body>
-
 </html>

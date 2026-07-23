@@ -1,6 +1,5 @@
 package com.example.ticket_router.controller;
 
-
 import com.example.ticket_router.entity.Ticket;
 import com.example.ticket_router.entity.User;
 import com.example.ticket_router.exception.UserNotFoundException;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
-
 /**
  * Serves the "My Tickets" page, showing a signed-in user's own ticket
  * submission history.
@@ -31,7 +29,6 @@ public class TicketPageController {
     private final TicketService ticketService;
     private final UserRepository userRepository;
 
-
     /**
      * @param ticketService  used to look up tickets belonging to the current user
      * @param userRepository used to look up the {@link User} associated with
@@ -41,13 +38,9 @@ public class TicketPageController {
             TicketService ticketService,
             UserRepository userRepository
     ) {
-
         this.ticketService = ticketService;
         this.userRepository = userRepository;
-
     }
-
-
 
     /**
      * Renders the authenticated user's ticket history.
@@ -64,13 +57,9 @@ public class TicketPageController {
             Authentication authentication,
             Model model
     ) {
-
         if (authentication == null || !authentication.isAuthenticated()) {
-
             log.debug("Unauthenticated access to '/my-tickets' - redirecting to login");
-
             return "redirect:/login";
-
         }
 
         log.info("User '{}' viewed their ticket history", authentication.getName());
@@ -91,24 +80,17 @@ public class TicketPageController {
                 userRepository.findByUsername(authentication.getName())
                         .orElseThrow(() -> new UserNotFoundException(authentication.getName()));
 
-
-
         List<Ticket> tickets =
                 ticketService
                         .getTicketsForUser(
                                 user
                         );
 
-
-
         model.addAttribute(
                 "tickets",
                 tickets
         );
 
-
         return "my-tickets";
-
     }
-
 }

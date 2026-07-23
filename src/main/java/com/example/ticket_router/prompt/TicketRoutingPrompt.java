@@ -1,7 +1,11 @@
 package com.example.ticket_router.prompt;
 
+/**
+ * Utility holder for {@link #SYSTEM_PROMPT}, the system prompt sent to the
+ * OpenAI LLM to classify a support ticket into a category, assigned team,
+ * and priority as part of the RAG ticket-routing pipeline.
+ */
 public final class TicketRoutingPrompt {
-
     public static final String SYSTEM_PROMPT = """
             You are a support ticket router for a software product.
 

@@ -59,54 +59,49 @@ public class OpenAiTicketRoutingClient implements TicketRoutingLlmClient {
      * @throws RoutingException if the OpenAI call still fails after all retry
      *                           attempts, or the response cannot be parsed
      */
-   @Override
-   @Retry(name = "openai")
-public String routeTicket(String ticketMessage) {
+    @Override
+    @Retry(name = "openai")
+    public String routeTicket(String ticketMessage) {
+        try {
+            Map<String, Object> request = Map.of(
+                    "model", "gpt-4o-mini",
+                    "messages", List.of(
+                            Map.of(
+                                    "role", "system",
+                                    "content", TicketRoutingPrompt.SYSTEM_PROMPT
+                            ),
+                            Map.of(
+                                    "role", "user",
+                                    "content", ticketMessage
+                            )
+                    ),
+                    "response_format",
+                    Map.of(
+                            "type", "json_object"
+                    ),
+                    "temperature", 0
+            );
 
-    try {
+            String response = webClient.post()
+                    .uri("/chat/completions")
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
 
-        Map<String, Object> request = Map.of(
-                "model", "gpt-4o-mini",
-                "messages", List.of(
-                        Map.of(
-                                "role", "system",
-                                "content", TicketRoutingPrompt.SYSTEM_PROMPT
-                        ),
-                        Map.of(
-                                "role", "user",
-                                "content", ticketMessage
-                        )
-                ),
-                "response_format",
-                Map.of(
-                        "type", "json_object"
-                ),
-                "temperature", 0
-        );
+            JsonNode json = objectMapper.readTree(response);
 
-        String response = webClient.post()
-                .uri("/chat/completions")
-                .bodyValue(request)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-
-        JsonNode json = objectMapper.readTree(response);
-
-        return json
-                .get("choices")
-                .get(0)
-                .get("message")
-                .get("content")
-                .asText();
-
-    } catch (Exception e) {
-
-        throw new RoutingException(
-                "Failed to get routing decision from OpenAI",
-                e
-        );
-
+            return json
+                    .get("choices")
+                    .get(0)
+                    .get("message")
+                    .get("content")
+                    .asText();
+        } catch (Exception e) {
+            throw new RoutingException(
+                    "Failed to get routing decision from OpenAI",
+                    e
+            );
+        }
     }
-}
 }

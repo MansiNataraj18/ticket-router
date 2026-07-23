@@ -5,12 +5,9 @@ import com.example.ticket_router.dto.TicketRoutingResult;
 import com.example.ticket_router.exception.InvalidTicketException;
 import com.example.ticket_router.exception.RoutingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 /**
@@ -33,7 +30,6 @@ public class TicketRoutingService {
     private final EmbeddingService embeddingService;
     private final QdrantService qdrantService;
 
-
     /**
      * @param llmClient        performs the final classification call to the LLM
      * @param objectMapper     used to parse the LLM's JSON response into a {@link TicketRoutingResult}
@@ -52,7 +48,6 @@ public class TicketRoutingService {
         this.qdrantService = qdrantService;
     }
 
-
     /**
      * Classifies a support ticket message using the RAG pipeline described in
      * the class-level documentation.
@@ -69,29 +64,19 @@ public class TicketRoutingService {
      *         LLM call, or parsing the LLM's response fails
      */
     public TicketRoutingResult route(String message) {
-
-
         // 1. Validate input
         validateTicket(message);
-
         log.debug("Routing ticket: {} characters", message.length());
 
-
         try {
-
             // 2. Generate embedding
             List<Float> vector =
                     embeddingService.generate(message);
 
-
-
             // 3. Search similar tickets
             String similarTickets =
                     qdrantService.findSimilarTickets(vector);
-
             log.debug("Found similar tickets context for routing");
-
-
 
             // 4. Create enriched prompt
             String enrichedMessage =
@@ -109,55 +94,37 @@ public class TicketRoutingService {
                             message
                     );
 
-
-
             // 5. Call LLM
             String rawJson =
                     llmClient.routeTicket(enrichedMessage);
-
             log.debug("Received LLM routing response");
-
-
 
             // 6. Parse response
             return objectMapper.readValue(
                     rawJson,
                     TicketRoutingResult.class
             );
-
-
         } catch (Exception e) {
-
             log.error("Ticket routing failed: {}", e.getMessage(), e);
-
             throw new RoutingException(
                     "Failed to process ticket routing",
                     e
             );
-
         }
     }
 
-
-
     private void validateTicket(String message) {
-
-
         if(message == null ||
                 message.isBlank()) {
-
             throw new InvalidTicketException(
                     "Ticket message cannot be empty"
             );
         }
 
-
         if(message.length() > 5000) {
-
             throw new InvalidTicketException(
                     "Ticket message cannot exceed 5000 characters"
             );
         }
-
     }
 }

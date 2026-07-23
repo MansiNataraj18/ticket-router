@@ -34,7 +34,6 @@ public class PageController {
      */
     @GetMapping("/")
     public String index(Authentication authentication, Model model) {
-
         if (authentication == null || !authentication.isAuthenticated()) {
             log.debug("Unauthenticated access to '/' - redirecting to login");
             return "redirect:/login";

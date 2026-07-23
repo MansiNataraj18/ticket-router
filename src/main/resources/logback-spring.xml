@@ -1,59 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <configuration>
-
     <property name="LOG_FILE" value="logs/ticket-router.log"/>
 
     <!-- Console logging -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
-
     </appender>
-
 
     <!-- File logging -->
     <appender name="FILE"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-
         <file>${LOG_FILE}</file>
-
         <append>true</append>
-
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-
             <fileNamePattern>
                 logs/ticket-router.%d{yyyy-MM-dd}.%i.log
             </fileNamePattern>
-
             <maxFileSize>10MB</maxFileSize>
-
             <maxHistory>30</maxHistory>
-
             <totalSizeCap>500MB</totalSizeCap>
-
         </rollingPolicy>
-
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
-
     </appender>
-
 
     <!-- Application logs -->
     <logger name="com.example.ticket_router" level="INFO"/>
 
-
     <root level="INFO">
-
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
-
     </root>
-
 
 </configuration>

@@ -1,6 +1,10 @@
 package com.example.ticket_router.dto;
 
-//enum used to set fixed values for priority of the ticket
+/**
+ * The AI-assigned severity of a ticket, ordered from least to most urgent.
+ * Set by the routing pipeline and stored on {@link
+ * com.example.ticket_router.entity.Ticket#getPriority()}.
+ */
 public enum Priority {
     LOW,
     MEDIUM,

@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 /**
  * Serves each department's own ticket dashboard.
  * <p>
@@ -42,7 +41,6 @@ public class DepartmentController {
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
 
-
     /**
      * @param ticketService    applies status changes and the rejected-only delete rule
      * @param ticketRepository used to look up a single ticket for ownership checks
@@ -57,7 +55,6 @@ public class DepartmentController {
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
     }
-
 
     /**
      * Renders the current user's department dashboard.
@@ -74,25 +71,20 @@ public class DepartmentController {
             @RequestParam(name = "priority", required = false) String priorityParam,
             Model model
     ) {
-
         User user = currentUser(authentication);
         UserType userType = user.getUserType();
 
         if (!userType.isDepartmentStaff()) {
-
             log.warn(
                     "User '{}' with non-department user type '{}' attempted to access /department",
                     user.getUsername(),
                     userType.getName()
             );
-
             return "redirect:/";
         }
 
         String department = userType.getDepartmentTeamName();
-
         Priority priorityFilter = parsePriority(priorityParam);
-
         log.info(
                 "User '{}' opened the {} dashboard (priority filter={})",
                 user.getUsername(),
@@ -112,7 +104,6 @@ public class DepartmentController {
         return "department";
     }
 
-
     /**
      * Updates a ticket's workflow status, restricted to tickets belonging to
      * the caller's own department.
@@ -129,12 +120,10 @@ public class DepartmentController {
             @RequestParam String status,
             Authentication authentication
     ) {
-
         User user = currentUser(authentication);
         requireOwnDepartmentTicket(id, user);
 
         TicketStatus newStatus;
-
         try {
             newStatus = TicketStatus.valueOf(status.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -143,12 +132,9 @@ public class DepartmentController {
         }
 
         ticketService.updateStatus(id, newStatus);
-
         log.info("User '{}' set ticket {} status to {}", user.getUsername(), id, newStatus);
-
         return "redirect:/department";
     }
-
 
     /**
      * Deletes a ticket, restricted to tickets belonging to the caller's own
@@ -164,24 +150,18 @@ public class DepartmentController {
             @PathVariable Long id,
             Authentication authentication
     ) {
-
         User user = currentUser(authentication);
         requireOwnDepartmentTicket(id, user);
 
         ticketService.deleteRejectedTicket(id);
-
         log.info("User '{}' deleted rejected ticket {}", user.getUsername(), id);
-
         return "redirect:/department";
     }
 
-
     private User currentUser(Authentication authentication) {
-
         return userRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new UserNotFoundException(authentication.getName()));
     }
-
 
     /**
      * Loads a ticket and verifies it belongs to the given user's department,
@@ -189,26 +169,21 @@ public class DepartmentController {
      * another department's tickets.
      */
     private Ticket requireOwnDepartmentTicket(Long ticketId, User user) {
-
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketNotFoundException(ticketId));
 
         String department = user.getUserType().getDepartmentTeamName();
-
         if (department == null || !department.equals(ticket.getAssignedTeam())) {
-
             log.warn(
                     "User '{}' attempted to act on ticket {} outside their department",
                     user.getUsername(),
                     ticketId
             );
-
             throw new InvalidTicketException("That ticket does not belong to your department");
         }
 
         return ticket;
     }
-
 
     /**
      * Parses a priority filter query parameter into a {@link Priority},
@@ -219,7 +194,6 @@ public class DepartmentController {
      * @return the matching {@link Priority}, or {@code null} if none was given or it was invalid
      */
     private Priority parsePriority(String priorityParam) {
-
         if (priorityParam == null || priorityParam.isBlank()) {
             return null;
         }
@@ -231,5 +205,4 @@ public class DepartmentController {
             return null;
         }
     }
-
 }

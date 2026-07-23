@@ -4,18 +4,14 @@ import com.example.ticket_router.entity.Permission;
 import com.example.ticket_router.entity.User;
 import com.example.ticket_router.entity.UserType;
 import com.example.ticket_router.repository.UserRepository;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Bridges the application's {@link User} entity to Spring Security's
@@ -36,9 +32,7 @@ import java.util.List;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-
     private final UserRepository userRepository;
-
 
     /**
      * @param userRepository used to look up the persisted {@link User} by username
@@ -48,7 +42,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     ) {
         this.userRepository = userRepository;
     }
-
 
     /**
      * Loads a user's authentication details by username.
@@ -62,8 +55,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
-
-
         User user =
                 userRepository.findByUsername(username)
                         .orElseThrow(() ->
@@ -71,17 +62,12 @@ public class CustomUserDetailsService implements UserDetailsService {
                                         "User not found"
                                 )
                         );
-
         UserType userType = user.getUserType();
-
         List<GrantedAuthority> authorities = new ArrayList<>();
-
         authorities.add(new SimpleGrantedAuthority("ROLE_" + userType.getName()));
-
         for (Permission permission : userType.getPermissions()) {
             authorities.add(new SimpleGrantedAuthority(permission.getPermissionName()));
         }
-
 
         return org.springframework.security.core.userdetails.User
                 .builder()

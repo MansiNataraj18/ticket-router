@@ -2,9 +2,12 @@ package com.example.ticket_router.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-//used to bind the openai configuration properties from application.properties file into java object
+/**
+ * Configuration properties for the OpenAI integration, bound from the
+ * {@code openai.*} keys in the application configuration (API key, base
+ * URL, and chat/embedding model to use).
+ */
 @ConfigurationProperties(prefix = "openai")
-//records contain getter methods, equals(), hashCode(), and toString() methods, and are immutable by default
 public record OpenAiProperties (
     String apiKey,
     String baseUrl,

@@ -7,6 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
+/**
+ * Spring Data JPA repository for {@link Ticket} entities, providing the
+ * lookups used by the user's own ticket history, the department dashboards,
+ * and the admin priority filters.
+ */
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     /**
@@ -43,5 +48,4 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
      * @return that department's tickets at that priority level, most recently created first
      */
     List<Ticket> findByAssignedTeamAndPriorityOrderByCreatedAtDesc(String assignedTeam, Priority priority);
-
 }

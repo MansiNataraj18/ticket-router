@@ -3,38 +3,23 @@
 <body>
 
 <header th:fragment="navbar(activePage, userName, isAdmin, isDepartmentStaff)" class="navbar">
-
     <div class="navbar-inner">
-
         <a href="/" class="brand">🎫 Smart Ticket Router</a>
-
         <nav class="nav-links">
-
             <a href="/" th:if="${!isAdmin and !isDepartmentStaff}" th:classappend="${activePage == 'submit'} ? 'active'">Submit Ticket</a>
-
             <a href="/my-tickets" th:if="${!isAdmin and !isDepartmentStaff}" th:classappend="${activePage == 'my-tickets'} ? 'active'">My Tickets</a>
-
             <a href="/department" th:if="${isDepartmentStaff}" th:classappend="${activePage == 'department'} ? 'active'">Department</a>
-
             <a href="/admin" th:if="${isAdmin}" th:classappend="${activePage == 'admin'} ? 'active'">Admin</a>
-
             <a href="/admin/users" th:if="${isAdmin}" th:classappend="${activePage == 'admin-users'} ? 'active'">Manage Users</a>
-
         </nav>
-
         <div class="navbar-user">
-
             <span class="user-name" th:text="${userName}"></span>
-
             <form th:action="@{/logout}" method="post" style="display:inline">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <button type="submit" class="link-button">Logout</button>
             </form>
-
         </div>
-
     </div>
-
 </header>
 
 </body>

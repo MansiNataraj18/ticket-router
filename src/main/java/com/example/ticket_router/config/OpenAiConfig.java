@@ -4,18 +4,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.reactive.function.client.WebClient;
 
-//tells us that this class contains bean definitions and configuration settings for the Spring application context
+/**
+ * Configures the {@link WebClient} used to call the OpenAI API, wiring in
+ * the base URL and API key from {@link OpenAiProperties}.
+ */
 @Configuration
 public class OpenAiConfig {
 
+    /**
+     * @param openAiProperties the configured OpenAI base URL and API key
+     * @return a {@link WebClient} pre-configured with OpenAI's base URL and
+     *         {@code Authorization} bearer header
+     */
     @Bean
     public WebClient openAiWebClient(OpenAiProperties openAiProperties) {
-        //create a WebClient bean that can be used to make HTTP requests to the OpenAI API, using the base URL and API key from the OpenAiProperties bean
         return WebClient.builder()
-                //set the base URL for the WebClient to the value of the baseUrl property from the OpenAiProperties bean
                 .baseUrl(openAiProperties.baseUrl())
                 .defaultHeader("Authorization", "Bearer " + openAiProperties.apiKey())
                 .build();
     }
-    
 }

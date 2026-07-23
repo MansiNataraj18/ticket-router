@@ -1,6 +1,5 @@
 package com.example.ticket_router.client;
 
-
 /**
  * Abstraction over the Qdrant vector database operations this application needs.
  * <p>
@@ -13,5 +12,4 @@ public interface QdrantClient {
      * does not already exist. Safe to call on every application startup.
      */
     void createCollection();
-
 }

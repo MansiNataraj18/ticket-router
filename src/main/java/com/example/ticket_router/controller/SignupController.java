@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
 /**
  * Handles self-service account registration.
  * <p>
@@ -31,11 +30,8 @@ public class SignupController {
     private static final Logger log = LoggerFactory.getLogger(SignupController.class);
 
     private final UserRepository userRepository;
-
     private final UserTypeRepository userTypeRepository;
-
     private final PasswordEncoder passwordEncoder;
-
 
     /**
      * @param userRepository     used to check for existing usernames and persist new users
@@ -52,7 +48,6 @@ public class SignupController {
         this.passwordEncoder = passwordEncoder;
     }
 
-
     /**
      * @return the {@code signup} view template
      */
@@ -60,7 +55,6 @@ public class SignupController {
     public String signupPage() {
         return "signup";
     }
-
 
     /**
      * Validates and creates a new {@code CUSTOMER} account.
@@ -79,25 +73,21 @@ public class SignupController {
             @RequestParam String fullName,
             Model model
     ) {
-
         if (username == null || username.isBlank()
                 || password == null || password.isBlank()
                 || fullName == null || fullName.isBlank()) {
-
             log.warn("Signup rejected: missing required fields");
             model.addAttribute("error", "All fields are required.");
             return "signup";
         }
 
         if (userRepository.findByUsername(username.trim()).isPresent()) {
-
             log.warn("Signup rejected: username '{}' already exists", username);
             model.addAttribute("error", "That username is already taken.");
             return "signup";
         }
 
         try {
-
             UserType customerType = userTypeRepository.findByName("CUSTOMER")
                     .orElseThrow(() -> new IllegalStateException(
                             "Expected user_type 'CUSTOMER' to exist - check migration V4"
@@ -111,11 +101,8 @@ public class SignupController {
             );
 
             userRepository.save(user);
-
             log.info("New user registered: '{}'", username);
-
         } catch (DataIntegrityViolationException e) {
-
             log.warn("Signup failed due to a database constraint for username '{}'", username, e);
             model.addAttribute("error", "That username is already taken.");
             return "signup";
@@ -123,5 +110,4 @@ public class SignupController {
 
         return "redirect:/login?signup";
     }
-
 }
